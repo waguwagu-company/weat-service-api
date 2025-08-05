@@ -5,7 +5,6 @@ import lombok.*;
 import org.hibernate.annotations.Comment;
 
 @Getter
-@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @DiscriminatorColumn(name = "type")
