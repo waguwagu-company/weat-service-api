@@ -65,7 +65,7 @@ public class SubmitAnalysisSettingDTO {
             private String inputText;
         }
     }
-    
+
     @Getter
     @Builder
     @Schema(description = "분석 설정 제출 응답")

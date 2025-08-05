@@ -1,5 +1,7 @@
 package com.waguwagu.weat.domain.analysis.service;
 
+import com.waguwagu.weat.domain.analysis.exception.CategoryNotFoundForIdException;
+import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundForIdException;
 import com.waguwagu.weat.domain.analysis.model.dto.CategorySettingDTO;
 import com.waguwagu.weat.domain.analysis.model.dto.SubmitAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
