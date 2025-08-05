@@ -2,7 +2,7 @@ name: CI/CD for weat-service-api
 
 on:
   push:
-    branches: [ "main", "feature/**" ]
+    branches: [ "main", "develop" ]
 
 jobs:
   deploy:
