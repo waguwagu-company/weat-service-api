@@ -13,7 +13,7 @@ import org.hibernate.annotations.Comment;
 @Entity
 @Comment("세부분석설정")
 @Table(name = "analysis_setting_detail")
-public abstract class AnalysisSettingDetail {
+public class AnalysisSettingDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
