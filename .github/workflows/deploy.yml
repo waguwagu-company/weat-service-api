@@ -18,9 +18,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Fetch .env file from private repo
+        run: |
+          curl -H "Authorization: token ${{ secrets.PRIVATE_GH_PAT }}" \
+            -H "Accept: application/vnd.github.v3.raw" \
+            -o .env \
+           ${{ secrets.PRIVATE_GH }}
+
       - name: Build with Gradle
         run: ./gradlew clean build -x test
-    
+
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_REGISTRY_URL }}/weat-service-api:latest .
