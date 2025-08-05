@@ -22,7 +22,7 @@ jobs:
         run: |
           curl -H "Authorization: token ${{ secrets.PRIVATE_GH_PAT }}" \
             -H "Accept: application/vnd.github.v3.raw" \
-            -o src/.env \
+            -o .env \
            ${{ secrets.PRIVATE_GH }}
 
       - name: Build with Gradle
