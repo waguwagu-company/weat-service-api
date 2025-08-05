@@ -2,7 +2,7 @@ package com.waguwagu.weat.domain.analysis.service;
 
 import com.waguwagu.weat.domain.analysis.exception.CategoryNotFoundForIdException;
 import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundForIdException;
-import com.waguwagu.weat.domain.analysis.model.dto.CategorySettingDTO;
+import com.waguwagu.weat.domain.analysis.model.dto.IsMemberSubmitAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.dto.SubmitAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
 import com.waguwagu.weat.domain.analysis.model.entity.AnalysisSetting;
@@ -32,8 +32,17 @@ public class AnalysisService {
     private final AnalysisSettingRepository analysisSettingRepository;
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
 
+    // 멤버별 분석 설정 제출 여부 조회
+    public IsMemberSubmitAnalysisSettingDTO.Response isMemberSubmitAnalysisSetting(Long memberId){
+        return IsMemberSubmitAnalysisSettingDTO.Response
+                .builder()
+                .memberId(memberId)
+                .isSubmitted(analysisSettingRepository.existsByMemberMemberId(memberId))
+                .build();
+    }
+
     @Transactional
-    // 개인별 분석 설정 제출
+    // 멤버별 분석 설정 제출
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
         // 회원 정보 조회
         Member member = memberRepository.findById(requestDto.getMemberId())
