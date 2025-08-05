@@ -13,7 +13,6 @@ public class LocationSettingDTO {
     private Long analysisSettingDetailId;
     private String analysisSettingDetailName;
     private AnalysisSettingDTO analysisSetting;
-    private AnalysisSettingDetailTypeDTO analysisSettingDetailType;
     private Double xPosition;
     private Double yPosition;
     private String roadnameAddress;
@@ -21,9 +20,7 @@ public class LocationSettingDTO {
     public static LocationSettingDTO of(LocationSetting entity) {
         return LocationSettingDTO.builder()
                 .analysisSettingDetailId(entity.getAnalysisSettingDetailId())
-                .analysisSettingDetailName(entity.getAnalysisSettingDetailName())
                 .analysisSetting(AnalysisSettingDTO.of(entity.getAnalysisSetting()))
-                .analysisSettingDetailType(AnalysisSettingDetailTypeDTO.of(entity.getAnalysisSettingDetailType()))
                 .xPosition(entity.getXPosition())
                 .yPosition(entity.getYPosition())
                 .roadnameAddress(entity.getRoadnameAddress())
