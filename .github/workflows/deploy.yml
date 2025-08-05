@@ -2,7 +2,7 @@ name: CI/CD for weat-service-api
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "feature/**" ]
 
 jobs:
   deploy:
@@ -26,8 +26,7 @@ jobs:
            ${{ secrets.PRIVATE_GH }}
 
       - name: Build with Gradle
-        run: ./gradlew clean build -x test # 임시로 테스트 제거
-#        run: ./gradlew clean build
+        run: ./gradlew clean build -x test
 
       - name: Build Docker image
         run: |
@@ -46,6 +45,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
+            docker login ${{ secrets.DOCKER_REGISTRY_URL }} -u ${{ secrets.DOCKER_REGISTRY_USERNAME }} -p ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
             docker pull ${{ secrets.DOCKER_REGISTRY_URL }}/weat-service-api:latest
             docker stop weat-service-api || true
             docker rm weat-service-api || true
