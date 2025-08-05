@@ -2,7 +2,7 @@ package com.waguwagu.weat.domain.analysis.model.dto;
 
 import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
 import com.waguwagu.weat.domain.analysis.model.entity.AnalysisStatus;
-import com.waguwagu.weat.domain.group.model.entity.Group;
+import com.waguwagu.weat.domain.group.model.dto.GroupDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,13 +19,13 @@ import lombok.ToString;
 @AllArgsConstructor
 public class AnalysisDTO {
     private Long analysisId;
-    private Group group;
+    private GroupDTO group;
     private AnalysisStatus analysisStatus;
 
     public static AnalysisDTO of(Analysis analysis) {
         return AnalysisDTO.builder()
                 .analysisId(analysis.getAnalysisId())
-                .group(analysis.getGroup())
+                .group(GroupDTO.fromEntity(analysis.getGroup()))
                 .analysisStatus(analysis.getAnalysisStatus())
                 .build();
     }
