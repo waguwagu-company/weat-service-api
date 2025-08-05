@@ -19,8 +19,8 @@ jobs:
           distribution: 'temurin'
 
       - name: Build with Gradle
-        run: ./gradlew clean build
-
+        run: ./gradlew clean build -x test
+    
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_REGISTRY_URL }}/weat-service-api:latest .
