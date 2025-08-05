@@ -2,9 +2,11 @@ package com.waguwagu.weat.domain.analysis.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Comment;
 
 @Getter
+@SuperBuilder
 @DiscriminatorValue("LOCATION")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

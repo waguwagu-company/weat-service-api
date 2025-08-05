@@ -2,12 +2,13 @@ package com.waguwagu.weat.domain.analysis.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Comment;
 
 @Getter
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 @Table(name = "category_setting")
 @Comment("카테고리 설정")

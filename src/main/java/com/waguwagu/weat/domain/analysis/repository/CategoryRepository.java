@@ -1,0 +1,7 @@
+package com.waguwagu.weat.domain.analysis.repository;
+
+import com.waguwagu.weat.domain.analysis.model.entity.Category;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CategoryRepository extends JpaRepository<Category, Long> {
+}
