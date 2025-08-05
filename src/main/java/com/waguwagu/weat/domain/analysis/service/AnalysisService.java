@@ -35,7 +35,7 @@ public class AnalysisService {
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
         // 회원 정보 조회
         Member member = memberRepository.findById(requestDto.getMemberId())
-                .orElseThrow(RuntimeException::new);
+                .orElseThrow(()->new MemberNotFoundForIdException(requestDto.getMemberId()));
 
         // 분석 정보 조회, 없는 경우 생성
         Analysis analysis = analysisRepository.findByGroupGroupId(member.getGroup().getGroupId())
@@ -51,6 +51,7 @@ public class AnalysisService {
                 .analysis(analysis)
                 .member(member)
                 .build();
+        
         analysisSettingRepository.save(analysisSetting);
 
         // 위치 설정
@@ -60,30 +61,34 @@ public class AnalysisService {
                 .yPosition(requestDto.getLocationSetting().getYPosition())
                 .roadnameAddress(requestDto.getLocationSetting().getRoadnameAddress())
                 .build();
+        
         analysisSettingDetailRepository.save(locationSetting);
 
         // 카테고리 설정
-        for (CategorySettingDTO categorySettingDTO : requestDto.getCategorySettingList()) {
-            Category category = categoryRepository.findById(categorySettingDTO.getCategory().getCategoryId())
-                    .orElseThrow(RuntimeException::new);
-            CategorySetting categorySetting = CategorySetting.builder()
+        for (SubmitAnalysisSettingDTO.Request.CategorySetting categorySettingDTO : requestDto.getCategorySettingList()) {
+            Category category = categoryRepository.findById(categorySettingDTO.getCategoryId())
+                    .orElseThrow(()->new CategoryNotFoundForIdException(categorySettingDTO.getCategoryId()));
+            
+                    CategorySetting categorySetting = CategorySetting.builder()
                     .analysisSetting(analysisSetting)
                     .category(category)
                     .isPreferred(categorySettingDTO.getIsPreferred())
                     .build();
+            
             analysisSettingDetailRepository.save(categorySetting);
         }
 
         // 텍스트 입력 설정
         TextInputSetting textInputSetting = TextInputSetting.builder()
                 .analysisSetting(analysisSetting)
-                .inputText(requestDto.getTextInputSettingDTO().getInputText())
+                .inputText(requestDto.getTextInputSetting().getInputText())
                 .build();
+        
         analysisSettingDetailRepository.save(textInputSetting);
 
         return SubmitAnalysisSettingDTO.Response.builder()
                 .memberId(member.getMemberId())
-                .settingId(analysisSetting.getAnalysisSettingId())
+                .analysisSettingId(analysisSetting.getAnalysisSettingId())
                 .build();
     }
 }
