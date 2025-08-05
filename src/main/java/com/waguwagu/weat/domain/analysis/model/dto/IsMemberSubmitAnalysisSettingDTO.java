@@ -14,6 +14,9 @@ public class IsMemberSubmitAnalysisSettingDTO {
     @Data
     @Builder
     public static class Response {
+        @Schema(description = "그룹 식별자")
+        private String groupId;
+
         @Schema(description = "멤버 식별자")
         private Long memberId;
 

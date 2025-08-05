@@ -33,10 +33,15 @@ public class AnalysisService {
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
 
     // 멤버별 분석 설정 제출 여부 조회
-    public IsMemberSubmitAnalysisSettingDTO.Response isMemberSubmitAnalysisSetting(Long memberId){
+    public IsMemberSubmitAnalysisSettingDTO.Response isMemberSubmitAnalysisSetting(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundForIdException(memberId));
+
         return IsMemberSubmitAnalysisSettingDTO.Response
                 .builder()
-                .memberId(memberId)
+                .groupId(member.getGroup().getGroupId())
+                .memberId(member.getMemberId())
                 .isSubmitted(analysisSettingRepository.existsByMemberMemberId(memberId))
                 .build();
     }
@@ -46,7 +51,7 @@ public class AnalysisService {
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
         // 회원 정보 조회
         Member member = memberRepository.findById(requestDto.getMemberId())
-                .orElseThrow(()->new MemberNotFoundForIdException(requestDto.getMemberId()));
+                .orElseThrow(() -> new MemberNotFoundForIdException(requestDto.getMemberId()));
 
         // 분석 정보 조회, 없는 경우 생성
         Analysis analysis = analysisRepository.findByGroupGroupId(member.getGroup().getGroupId())
@@ -62,7 +67,7 @@ public class AnalysisService {
                 .analysis(analysis)
                 .member(member)
                 .build();
-        
+
         analysisSettingRepository.save(analysisSetting);
 
         // 위치 설정
@@ -72,20 +77,20 @@ public class AnalysisService {
                 .yPosition(requestDto.getLocationSetting().getYPosition())
                 .roadnameAddress(requestDto.getLocationSetting().getRoadnameAddress())
                 .build();
-        
+
         analysisSettingDetailRepository.save(locationSetting);
 
         // 카테고리 설정
         for (SubmitAnalysisSettingDTO.Request.CategorySetting categorySettingDTO : requestDto.getCategorySettingList()) {
             Category category = categoryRepository.findById(categorySettingDTO.getCategoryId())
-                    .orElseThrow(()->new CategoryNotFoundForIdException(categorySettingDTO.getCategoryId()));
-            
-                    CategorySetting categorySetting = CategorySetting.builder()
+                    .orElseThrow(() -> new CategoryNotFoundForIdException(categorySettingDTO.getCategoryId()));
+
+            CategorySetting categorySetting = CategorySetting.builder()
                     .analysisSetting(analysisSetting)
                     .category(category)
                     .isPreferred(categorySettingDTO.getIsPreferred())
                     .build();
-            
+
             analysisSettingDetailRepository.save(categorySetting);
         }
 
@@ -94,7 +99,7 @@ public class AnalysisService {
                 .analysisSetting(analysisSetting)
                 .inputText(requestDto.getTextInputSetting().getInputText())
                 .build();
-        
+
         analysisSettingDetailRepository.save(textInputSetting);
 
         return SubmitAnalysisSettingDTO.Response.builder()
