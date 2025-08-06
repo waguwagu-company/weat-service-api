@@ -69,9 +69,13 @@ public class AIAnalysisDTO {
                     private Long placeId;
                     private String placeName;
                     private String placeRoadNameAddress;
+                    private List<PlaceImage> placeImageList;
+                }
 
-                    private List<String> placeImageUrlList = new ArrayList<>();
-                    private List<Byte[]> placeImageDataList = new ArrayList<>();
+                @Getter
+                public static class PlaceImage {
+                    private String placeImageUrl;
+                    private Byte[] placeImageData;
                 }
 
                 @Getter

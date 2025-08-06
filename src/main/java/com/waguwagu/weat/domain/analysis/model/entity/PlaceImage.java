@@ -25,5 +25,5 @@ public class PlaceImage {
 
     @Lob
     @Column(name = "place_image_data")
-    private byte[] placeImageData;
+    private Byte[] placeImageData;
 }
