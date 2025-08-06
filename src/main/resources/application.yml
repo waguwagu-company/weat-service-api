@@ -24,3 +24,6 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
     url: https://weat.kro.kr/v3/api-docs
+
+swagger:
+  server-url: /
