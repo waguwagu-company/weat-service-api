@@ -16,10 +16,11 @@ public class AnalysisResultDetail {
     @Column(name = "analysis_result_detail_id")
     private Integer analysisResultDetailId;
 
-    @Column(name = "analysis_result_id", nullable = false)
-    private Integer analysisResultId; // 추후 연관관계 설정 가능 (예: @ManyToOne)
-
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "analysis_result_id", nullable = false)
+    private AnalysisResult analysisResult;
+
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 
