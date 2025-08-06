@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.analysis.model.entity;
 
+import lombok.*;
 import org.hibernate.annotations.Comment;import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import com.waguwagu.weat.domain.group.model.entity.Group;
@@ -14,13 +15,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Getter
 @Builder
@@ -43,6 +37,7 @@ public class Analysis {
     @ToString.Exclude
     private Group group;
 
+    @Setter
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "analysis_status", nullable = false, columnDefinition = "VARCHAR(50)")

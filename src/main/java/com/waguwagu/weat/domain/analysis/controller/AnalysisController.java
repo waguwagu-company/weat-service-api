@@ -63,4 +63,11 @@ public class AnalysisController {
     public ResponseDTO<IsAnalysisStartAvailableDTO.Response> isAnalysisStartAvailable(@RequestParam("groupId") String groupId) {
         return ResponseDTO.of(analysisService.isAnalysisStartAvailable(groupId));
     }
+
+    // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
+    @Operation(summary = "분석 시작 요청", description = "분석 시작 조건을 충족한 경우, 요청시점까지 제출된 분석설정을 활용하여 분석을 진행한다.")
+    @PostMapping("/")
+    public ResponseDTO<AnalysisStartDTO.Response> analysisStart(@RequestBody AnalysisStartDTO.Request request){
+        return ResponseDTO.of(analysisService.analysisStart(request.getGroupId()));
+    }
 }
