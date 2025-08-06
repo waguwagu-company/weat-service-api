@@ -1,8 +1,8 @@
 package com.waguwagu.weat.domain.group.service;
 
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
+import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
-import com.waguwagu.weat.domain.group.exception.GroupNotFoundForIdException;
 import com.waguwagu.weat.domain.group.model.dto.CreateGroupDTO;
 import com.waguwagu.weat.domain.group.model.dto.JoinGroupDTO;
 import com.waguwagu.weat.domain.group.model.entity.Group;
@@ -41,14 +41,13 @@ public class GroupService {
     }
 
     @Transactional
-    public ResponseEntity<ResponseDTO<JoinGroupDTO.Response>> joinGroup(String groupId) {
+    public JoinGroupDTO.Response joinGroup(String groupId) {
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GroupNotFoundForIdException(groupId));
+                .orElseThrow(() -> new GroupNotFoundException(groupId));
 
         long memberCount = memberRepository.countByGroup(group);
         if (memberCount >= 9) {
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(ResponseDTO.fail(HttpStatus.CONFLICT.value(), "그룹 정원을 초과하였습니다."));
+            throw new GroupMemberLimitExceededException();
         }
 
         Member member = Member.builder()
@@ -57,8 +56,8 @@ public class GroupService {
                 .build();
         Member savedMember = memberRepository.save(member);
 
-        return ResponseEntity.ok(ResponseDTO.of(JoinGroupDTO.Response.builder()
+        return JoinGroupDTO.Response.builder()
                 .memberId(savedMember.getMemberId())
-                .build()));
+                .build();
     }
 }

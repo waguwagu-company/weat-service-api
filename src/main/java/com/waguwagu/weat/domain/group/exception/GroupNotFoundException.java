@@ -1,16 +1,16 @@
 package com.waguwagu.weat.domain.group.exception;
 
-import com.waguwagu.weat.domain.common.exception.EntityNotFoundException;
+import com.waguwagu.weat.global.exception.BaseException;
+import com.waguwagu.weat.global.exception.ErrorCode;
 
-public class GroupNotFoundException extends EntityNotFoundException {
-    private static final String DEFAULT_MESSAGE = "존재하지 않는 그룹입니다.";
+public class GroupNotFoundException extends BaseException {
 
     public GroupNotFoundException() {
-        super(DEFAULT_MESSAGE);
+        super(ErrorCode.GROUP_NOT_FOUND);
     }
 
-    public GroupNotFoundException(String message) {
-        super(message);
+    public GroupNotFoundException(String groupId) {
+        super(ErrorCode.GROUP_NOT_FOUND, ErrorCode.GROUP_NOT_FOUND.getMessage() + " (groupId: " + groupId + ")");
     }
-    
 }
+

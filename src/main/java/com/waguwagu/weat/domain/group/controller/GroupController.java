@@ -20,7 +20,7 @@ public class GroupController {
     private final GroupService groupService;
 
     @Operation(summary = "그룹 생성", description = "그룹을 생성합니다.")
-    @PostMapping(produces = "application/json")
+    @PostMapping("/")
     public ResponseEntity<ResponseDTO<CreateGroupDTO.Response>> createGroup() {
         return ResponseEntity.ok(ResponseDTO.of(groupService.createGroup()));
     }
@@ -28,6 +28,6 @@ public class GroupController {
     @Operation(summary = "그룹 참여", description = "생성된 그룹에 참여합니다.")
     @PostMapping("/{groupId}/members")
     public ResponseEntity<ResponseDTO<JoinGroupDTO.Response>> joinGroup(@PathVariable String groupId) {
-        return groupService.joinGroup(groupId);
+        return ResponseEntity.ok(ResponseDTO.of(groupService.joinGroup(groupId)));
     }
 }

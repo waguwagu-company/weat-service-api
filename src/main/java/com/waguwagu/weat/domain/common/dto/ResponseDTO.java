@@ -20,12 +20,19 @@ public class ResponseDTO<T> {
 
     @Schema(description = "응답 상태 코드", example = "200")
     private int status = DEFAULT_STATUS;
+
+    private String code;
     
     @Schema(description = "응답 메시지", example = "SUCCESS")
     private String message = DEFAULT_MESSAGE;
     
     @Schema(description = "응답 데이터")
     private T data;
+
+    public ResponseDTO<T> code(String code) {
+        this.code = code;
+        return this;
+    }
 
     public ResponseDTO<T> status(int status) {
         this.status = status;
@@ -49,9 +56,9 @@ public class ResponseDTO<T> {
                 .data(data);
     }
 
-    public static <T> ResponseDTO<T> fail(int status, String message) {
+    public static <T> ResponseDTO<T> fail(String code, String message) {
         return new ResponseDTO<T>()
-                .status(status)
+                .code(code)
                 .message(message)
                 .data(null);
     }
