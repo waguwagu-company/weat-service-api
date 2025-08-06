@@ -31,3 +31,6 @@ swagger:
 ai:
   service:
     base-url: ${AI_SERVICE_BASE_URL}
+
+mybatis:
+  mapper-locations: classpath:mapper/**/*.xml
