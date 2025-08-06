@@ -1,10 +1,7 @@
 package com.waguwagu.weat.domain.group.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -15,7 +12,7 @@ import java.util.List;
 public class GroupResultDetailDTO {
 
     @Schema(description = "장소 식별자")
-    private String placeId;
+    private Long placeId;
 
     @Schema(description = "장소명")
     private String placeName;
@@ -30,6 +27,7 @@ public class GroupResultDetailDTO {
     private String analysisBasisContent;
 
     @Schema(description = "장소 이미지 목록")
+    @Setter
     List<PlaceImageDTO> placeImageList;
 
 

@@ -2,9 +2,8 @@ package com.waguwagu.weat.domain.group.service;
 
 import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
-import com.waguwagu.weat.domain.group.model.dto.CreateGroupDTO;
-import com.waguwagu.weat.domain.group.model.dto.GroupResultDTO;
-import com.waguwagu.weat.domain.group.model.dto.JoinGroupDTO;
+import com.waguwagu.weat.domain.group.mapper.GroupMapper;
+import com.waguwagu.weat.domain.group.model.dto.*;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
@@ -13,12 +12,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class GroupService {
 
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
+
+    private final GroupMapper groupMapper;
 
     @Transactional
     public CreateGroupDTO.Response createGroup() {
@@ -61,10 +66,38 @@ public class GroupService {
 
 
     public GroupResultDTO.Response getGroupResult(String groupId) {
-        Group group = groupRepository.findById(groupId)
+        Group groupEntity = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException(groupId));
 
         // 분석 결과 조회
+        List<GroupResultQueryDTO> queryResult = groupMapper.selectGroupAnalysisResult(groupId);
+
+        List<GroupResultDetailDTO> result = queryResult.stream()
+                .collect(Collectors.groupingBy(GroupResultQueryDTO::getPlaceId, LinkedHashMap::new, Collectors.toList()))
+                .entrySet().stream()
+                .map(entry -> {
+                    List<GroupResultQueryDTO> group = entry.getValue();
+                    GroupResultQueryDTO first = group.get(0);
+
+                    GroupResultDetailDTO dto = GroupResultDetailDTO.builder()
+                            .placeId(first.getPlaceId())
+                            .placeName(first.getPlaceName())
+                            .placeAddress(first.getPlaceRoadnameAddress())
+                            .analysisBasisContent(first.getAnalysisBasisContent())
+                            .analysisResultContent(first.getAnalysisResultDetailContent())
+                            .build();
+
+                    List<PlaceImageDTO> imageList = group.stream()
+                            .map(g -> new PlaceImageDTO(g.getPlaceImageUrl()))
+                            .collect(Collectors.toList());
+
+                    dto.setPlaceImageList(imageList);
+                    return dto;
+                })
+                .toList();
+
+
+
         return null;
     }
 }

@@ -18,4 +18,22 @@
             id = #{groupId}
     </select>
 
+    <select id="selectGroupAnalysisResult" resultType="com.waguwagu.weat.domain.group.model.dto.GroupResultQueryDTO">
+        select ard.analysis_result_detail_content AS analysisResultDetailContent,
+               ab.analysis_basis_type             AS analysisBasisType,
+               ab.analysis_basis_content          AS analysisBasisContent,
+               p.place_id                         AS placeId,
+               p.place_name                       AS placeName,
+               p.place_roadname_address           AS placeRoadnameAddress,
+               pi.place_image_url                 AS placeImageUrl
+        from "group" g
+                 join analysis_result ar on g.group_id = ar.group_id
+                 join analysis_result_detail ard on ar.analysis_result_id = ard.analysis_result_id
+                 join analysis_basis ab on ard.analysis_result_detail_id = ab.analysis_result_detail_id
+                 join place p on ard.place_id = p.place_id
+                 join place_image pi on p.place_id = pi.place_id
+        WHERE
+            g.group_id = #{groupId}
+    </select>
+
 </mapper>
