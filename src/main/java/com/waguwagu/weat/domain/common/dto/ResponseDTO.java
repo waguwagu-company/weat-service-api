@@ -48,4 +48,11 @@ public class ResponseDTO<T> {
                 .message(DEFAULT_MESSAGE)
                 .data(data);
     }
+
+    public static <T> ResponseDTO<T> fail(int status, String message) {
+        return new ResponseDTO<T>()
+                .status(status)
+                .message(message)
+                .data(null);
+    }
 }

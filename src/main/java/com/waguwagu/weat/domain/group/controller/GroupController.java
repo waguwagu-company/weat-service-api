@@ -1,14 +1,15 @@
 package com.waguwagu.weat.domain.group.controller;
 
+import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import com.waguwagu.weat.domain.group.model.dto.CreateGroupDTO;
+import com.waguwagu.weat.domain.group.model.dto.JoinGroupDTO;
 import com.waguwagu.weat.domain.group.service.GroupService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/group")
@@ -18,8 +19,15 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    @GetMapping(value = "/create", produces = "application/json")
-    public ResponseEntity<CreateGroupDTO.Response> createGroup() {
-        return ResponseEntity.ok(groupService.createGroup());
+    @Operation(summary = "그룹 생성", description = "그룹을 생성합니다.")
+    @PostMapping(produces = "application/json")
+    public ResponseEntity<ResponseDTO<CreateGroupDTO.Response>> createGroup() {
+        return ResponseEntity.ok(ResponseDTO.of(groupService.createGroup()));
+    }
+
+    @Operation(summary = "그룹 참여", description = "생성된 그룹에 참여합니다.")
+    @PostMapping("/{groupId}/members")
+    public ResponseEntity<ResponseDTO<JoinGroupDTO.Response>> joinGroup(@PathVariable String groupId) {
+        return groupService.joinGroup(groupId);
     }
 }
