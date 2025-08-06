@@ -1,18 +1,18 @@
 package com.waguwagu.weat.domain.analysis.service;
 
-import com.waguwagu.weat.domain.analysis.exception.CategoryNotFoundForIdException;
+import com.waguwagu.weat.domain.category.exception.CategoryNotFoundForIdException;
 import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundForIdException;
 import com.waguwagu.weat.domain.analysis.model.dto.IsMemberSubmitAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.dto.SubmitAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
 import com.waguwagu.weat.domain.analysis.model.entity.AnalysisSetting;
-import com.waguwagu.weat.domain.analysis.model.entity.Category;
+import com.waguwagu.weat.domain.category.model.entity.Category;
 import com.waguwagu.weat.domain.analysis.model.entity.CategorySetting;
 import com.waguwagu.weat.domain.analysis.model.entity.LocationSetting;
 import com.waguwagu.weat.domain.analysis.model.entity.TextInputSetting;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingDetailRepository;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingRepository;
-import com.waguwagu.weat.domain.analysis.repository.CategoryRepository;
+import com.waguwagu.weat.domain.category.repository.CategoryRepository;
 import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import org.springframework.stereotype.Service;
