@@ -6,7 +6,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import lombok.Setter;
 
+@Setter
 @Getter
 @Schema(description = "멤버별 분석설정 제출 여부 조회")
 public class IsMemberSubmitAnalysisSettingDTO {
