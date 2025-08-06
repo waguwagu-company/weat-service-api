@@ -1,24 +1,24 @@
 package com.waguwagu.weat.domain.analysis.service;
 
+import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
 import com.waguwagu.weat.domain.analysis.model.dto.IsAnalysisStartAvailableDTO;
-import com.waguwagu.weat.domain.analysis.model.entity.*;
-import com.waguwagu.weat.domain.category.exception.CategoryNotFoundForIdException;
-import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundForIdException;
 import com.waguwagu.weat.domain.analysis.model.dto.IsMemberSubmitAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.dto.SubmitAnalysisSettingDTO;
-import com.waguwagu.weat.domain.category.model.entity.Category;
+import com.waguwagu.weat.domain.analysis.model.entity.*;
+import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingDetailRepository;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingRepository;
+import com.waguwagu.weat.domain.category.exception.CategoryNotFoundException;
+import com.waguwagu.weat.domain.category.model.entity.Category;
 import com.waguwagu.weat.domain.category.repository.CategoryRepository;
-import com.waguwagu.weat.domain.group.exception.GroupNotFoundForIdException;
+import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
-import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
@@ -44,7 +44,7 @@ public class AnalysisService {
         final int submittedCountCriteria = 2;
 
         Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GroupNotFoundForIdException(groupId));
+                .orElseThrow(() -> new GroupNotFoundException(groupId));
 
         Optional<Analysis> optionalAnalysis = analysisRepository.findByGroupGroupId(groupId);
 
@@ -71,7 +71,7 @@ public class AnalysisService {
     public IsMemberSubmitAnalysisSettingDTO.Response isMemberSubmitAnalysisSetting(Long memberId) {
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundForIdException(memberId));
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
 
         return IsMemberSubmitAnalysisSettingDTO.Response
                 .builder()
@@ -86,7 +86,7 @@ public class AnalysisService {
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
         // 회원 정보 조회
         Member member = memberRepository.findById(requestDto.getMemberId())
-                .orElseThrow(() -> new MemberNotFoundForIdException(requestDto.getMemberId()));
+                .orElseThrow(() -> new MemberNotFoundException(requestDto.getMemberId()));
 
         // 분석 정보 조회, 없는 경우 생성
         Analysis analysis = analysisRepository.findByGroupGroupId(member.getGroup().getGroupId())
@@ -118,7 +118,7 @@ public class AnalysisService {
         // 카테고리 설정
         for (SubmitAnalysisSettingDTO.Request.CategorySetting categorySettingDTO : requestDto.getCategorySettingList()) {
             Category category = categoryRepository.findById(categorySettingDTO.getCategoryId())
-                    .orElseThrow(() -> new CategoryNotFoundForIdException(categorySettingDTO.getCategoryId()));
+                    .orElseThrow(() -> new CategoryNotFoundException(categorySettingDTO.getCategoryId()));
 
             CategorySetting categorySetting = CategorySetting.builder()
                     .analysisSetting(analysisSetting)

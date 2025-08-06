@@ -1,17 +1,16 @@
 package com.waguwagu.weat.domain.category.exception;
 
-import com.waguwagu.weat.domain.common.exception.EntityNotFoundException;
+import com.waguwagu.weat.global.exception.BaseException;
+import com.waguwagu.weat.global.exception.ErrorCode;
 
-public class CategoryNotFoundException extends EntityNotFoundException{
-
-    private static final String DEFAULT_MESSAGE = "존재하지 않는 카테고리입니다.";
+public class CategoryNotFoundException extends BaseException {
 
     public CategoryNotFoundException() {
-        super(DEFAULT_MESSAGE);
+        super(ErrorCode.CATEGORY_NOT_FOUND);
     }
 
-    public CategoryNotFoundException(String message) {
-        super(message);
+    public CategoryNotFoundException(Long categoryId) {
+        super(ErrorCode.CATEGORY_NOT_FOUND, ErrorCode.GROUP_NOT_FOUND.getMessage() + " (categoryId: " + categoryId + ")");
     }
     
 }

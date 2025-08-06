@@ -1,16 +1,15 @@
 package com.waguwagu.weat.domain.analysis.exception;
 
-import com.waguwagu.weat.domain.common.exception.EntityNotFoundException;
+import com.waguwagu.weat.global.exception.BaseException;
+import com.waguwagu.weat.global.exception.ErrorCode;
 
-public class MemberNotFoundException extends EntityNotFoundException {
-    private static final String DEFAULT_MESSAGE = "존재하지 않는 멤버입니다.";
-
+public class MemberNotFoundException extends BaseException {
     public MemberNotFoundException() {
-        super(DEFAULT_MESSAGE);
+        super(ErrorCode.MEMBER_NOT_FOUND);
     }
     
-    public MemberNotFoundException(String message) {
-        super(message);
+    public MemberNotFoundException(Long memberId) {
+        super(ErrorCode.GROUP_NOT_FOUND, ErrorCode.GROUP_NOT_FOUND.getMessage() + " (memberId: " + memberId + ")");
     }
     
 }

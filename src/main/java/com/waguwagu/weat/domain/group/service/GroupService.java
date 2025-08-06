@@ -1,6 +1,5 @@
 package com.waguwagu.weat.domain.group.service;
 
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.dto.CreateGroupDTO;
@@ -10,8 +9,6 @@ import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.common.dto;
 
+import com.waguwagu.weat.global.exception.ErrorCode;
 import io.swagger.v3.oas.annotations.media.Schema;
 import org.springframework.http.HttpStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,29 +14,17 @@ import lombok.NoArgsConstructor;
 @Schema(description = "공통 응답 DTO")
 public class ResponseDTO<T> {
 
-    @JsonIgnore
-    private static final int DEFAULT_STATUS = HttpStatus.OK.value();
-    @JsonIgnore
-    private static final String DEFAULT_MESSAGE = "SUCCESS";
-
-    @Schema(description = "응답 상태 코드", example = "200")
-    private int status = DEFAULT_STATUS;
-
+    @Schema(description = "응답 코드", example = "GROUP_NOT_FOUND")
     private String code;
     
     @Schema(description = "응답 메시지", example = "SUCCESS")
-    private String message = DEFAULT_MESSAGE;
+    private String message;
     
     @Schema(description = "응답 데이터")
     private T data;
 
     public ResponseDTO<T> code(String code) {
         this.code = code;
-        return this;
-    }
-
-    public ResponseDTO<T> status(int status) {
-        this.status = status;
         return this;
     }
 
@@ -51,8 +40,8 @@ public class ResponseDTO<T> {
 
     public static <T> ResponseDTO<T> of(T data) {
         return new ResponseDTO<T>()
-                .status(DEFAULT_STATUS)
-                .message(DEFAULT_MESSAGE)
+                .code(ErrorCode.SUCCESS.getCode())
+                .message(ErrorCode.SUCCESS.getMessage())
                 .data(data);
     }
 
