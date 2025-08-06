@@ -9,7 +9,7 @@ public class MemberNotFoundException extends BaseException {
     }
     
     public MemberNotFoundException(Long memberId) {
-        super(ErrorCode.GROUP_NOT_FOUND, ErrorCode.GROUP_NOT_FOUND.getMessage() + " (memberId: " + memberId + ")");
+        super(ErrorCode.MEMBER_NOT_FOUND, ErrorCode.MEMBER_NOT_FOUND.getMessage() + " (memberId: " + memberId + ")");
     }
     
 }
