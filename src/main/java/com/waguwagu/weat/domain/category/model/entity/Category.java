@@ -1,4 +1,4 @@
-package com.waguwagu.weat.domain.analysis.model.entity;
+package com.waguwagu.weat.domain.category.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

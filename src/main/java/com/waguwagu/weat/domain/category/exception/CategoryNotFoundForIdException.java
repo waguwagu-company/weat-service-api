@@ -1,4 +1,4 @@
-package com.waguwagu.weat.domain.analysis.exception;
+package com.waguwagu.weat.domain.category.exception;
 
 public class CategoryNotFoundForIdException extends CategoryNotFoundException{
     private static final String DEFAULT_MESSAGE = "존재하지 않는 카테고리입니다.";

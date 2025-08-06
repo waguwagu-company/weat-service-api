@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.analysis.model.entity;
 
+import com.waguwagu.weat.domain.category.model.entity.Category;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
