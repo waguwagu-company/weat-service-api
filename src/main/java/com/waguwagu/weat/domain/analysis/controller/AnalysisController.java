@@ -25,13 +25,13 @@ public class AnalysisController {
             description = "성공",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = SubmitAnalysisSettingDtoResponseWrapper.class)
+                    schema = @Schema(implementation = SubmitAnalysisSettingDTO.Response.class)
             )
     )
     @PostMapping("/settings")
-    public SubmitAnalysisSettingDtoResponseWrapper submitAnalysisSetting(
+    public ResponseDTO<SubmitAnalysisSettingDTO.Response> submitAnalysisSetting(
             @RequestBody SubmitAnalysisSettingDTO.Request requestDto) {
-        return (SubmitAnalysisSettingDtoResponseWrapper) ResponseDTO.of(analysisService.submitAnalysisSetting(requestDto));
+        return ResponseDTO.of(analysisService.submitAnalysisSetting(requestDto));
     }
 
 
@@ -41,12 +41,12 @@ public class AnalysisController {
             description = "성공",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = IsMemberSubmitAnalysisSettingDtoResponseWrapper.class)
+                    schema = @Schema(implementation = IsMemberSubmitAnalysisSettingDTO.Response.class)
             )
     )
     @GetMapping(value = "/settings/status")
-    public IsMemberSubmitAnalysisSettingDtoResponseWrapper isMemberSubmitAnalysisSetting(@RequestParam("memberId") Long memberId) {
-        return (IsMemberSubmitAnalysisSettingDtoResponseWrapper) ResponseDTO.of(analysisService.isMemberSubmitAnalysisSetting(memberId));
+    public ResponseDTO<IsMemberSubmitAnalysisSettingDTO.Response> isMemberSubmitAnalysisSetting(@RequestParam("memberId") Long memberId) {
+        return ResponseDTO.of(analysisService.isMemberSubmitAnalysisSetting(memberId));
     }
 
 
@@ -60,7 +60,7 @@ public class AnalysisController {
             )
     )
     @GetMapping("/status")
-    public IsAnalysisStartAvailableDtoResponseWrapper isAnalysisStartAvailable(@RequestParam("groupId") String groupId) {
-        return (IsAnalysisStartAvailableDtoResponseWrapper) ResponseDTO.of(analysisService.isAnalysisStartAvailable(groupId));
+    public ResponseDTO<IsAnalysisStartAvailableDTO.Response> isAnalysisStartAvailable(@RequestParam("groupId") String groupId) {
+        return ResponseDTO.of(analysisService.isAnalysisStartAvailable(groupId));
     }
 }
