@@ -27,3 +27,7 @@ springdoc:
 
 swagger:
   server-url: /
+
+ai:
+  service:
+    base-url: ${AI_SERVICE_BASE_URL}

@@ -1,12 +1,10 @@
 package com.waguwagu.weat.domain.analysis.service;
 
+import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisAlreadyStartedForGroupIdException;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
 import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
-import com.waguwagu.weat.domain.analysis.model.dto.AnalysisStartDTO;
-import com.waguwagu.weat.domain.analysis.model.dto.IsAnalysisStartAvailableDTO;
-import com.waguwagu.weat.domain.analysis.model.dto.IsMemberSubmitAnalysisSettingDTO;
-import com.waguwagu.weat.domain.analysis.model.dto.SubmitAnalysisSettingDTO;
+import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingDetailRepository;
@@ -20,6 +18,7 @@ import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -37,6 +36,7 @@ public class AnalysisService {
 
     private final Executor analysisServiceExcutor = Executors.newFixedThreadPool(10);
 
+    private final AIServiceAdaptor aiServiceAdaptor;
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
@@ -174,13 +174,18 @@ public class AnalysisService {
         // 비동기로 AI 분석서비스에 분석 요청
         CompletableFuture.runAsync(() -> {
             try {
-                String result = sendAiServiceApiRequest();
+                AIAnalysisDTO.Response response =
+                        aiServiceAdaptor.requestAnalysis(AIAnalysisDTO.Request.builder().groupId(groupId).build());
+
+                log.info("response => {}", response.toString());
                 /**
                  *  TODO: AI 분석 성공 후 후처리
                  *  analysis.setAnalysisStatus(AnalysisStatus.COMPLETED);
                  *  analysisRepository.save(analysis);
                  *
                  */
+
+
             } catch (Exception e) {
                 /**
                  * TODO: AI 분석 실패 시 처리
