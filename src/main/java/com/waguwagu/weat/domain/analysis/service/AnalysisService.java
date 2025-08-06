@@ -1,24 +1,27 @@
 package com.waguwagu.weat.domain.analysis.service;
 
+import com.waguwagu.weat.domain.analysis.model.dto.IsAnalysisStartAvailableDTO;
+import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.category.exception.CategoryNotFoundForIdException;
 import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundForIdException;
 import com.waguwagu.weat.domain.analysis.model.dto.IsMemberSubmitAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.dto.SubmitAnalysisSettingDTO;
-import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisSetting;
 import com.waguwagu.weat.domain.category.model.entity.Category;
-import com.waguwagu.weat.domain.analysis.model.entity.CategorySetting;
-import com.waguwagu.weat.domain.analysis.model.entity.LocationSetting;
-import com.waguwagu.weat.domain.analysis.model.entity.TextInputSetting;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingDetailRepository;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingRepository;
 import com.waguwagu.weat.domain.category.repository.CategoryRepository;
+import com.waguwagu.weat.domain.group.exception.GroupNotFoundForIdException;
+import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
+import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
+import java.util.Optional;
 
 
 @Service
@@ -26,11 +29,43 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AnalysisService {
 
+    private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
     private final AnalysisRepository analysisRepository;
     private final AnalysisSettingRepository analysisSettingRepository;
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
+
+
+    // 분석 시작가능조건 충족여부 및 분석상태 조회
+    public IsAnalysisStartAvailableDTO.Response isAnalysisStartAvailable(String groupId) {
+
+        // TODO: 추후 명확한 기준(제출 인원)이 정해지면 수정 예정
+        final int submittedCountCriteria = 2;
+
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new GroupNotFoundForIdException(groupId));
+
+        Optional<Analysis> optionalAnalysis = analysisRepository.findByGroupGroupId(groupId);
+
+        boolean isAnalysisStarted = optionalAnalysis
+                .map(analysis -> !analysis.getAnalysisStatus().equals(AnalysisStatus.NOT_STARTED))
+                .orElse(false);
+
+        List<Member> memberList = memberRepository.findAllByGroupGroupId(groupId);
+
+        int submittedCount = (int) memberList.stream()
+                .filter(member -> analysisSettingRepository.existsByMemberMemberId(member.getMemberId()))
+                .count();
+
+        return IsAnalysisStartAvailableDTO.Response.builder()
+                .groupId(group.getGroupId())
+                .submittedCount(submittedCount)
+                .isAnalysisStartConditionSatisfied(submittedCount >= submittedCountCriteria)
+                .isAnalysisStarted(isAnalysisStarted)
+                .build();
+    }
+
 
     // 멤버별 분석 설정 제출 여부 조회
     public IsMemberSubmitAnalysisSettingDTO.Response isMemberSubmitAnalysisSetting(Long memberId) {
