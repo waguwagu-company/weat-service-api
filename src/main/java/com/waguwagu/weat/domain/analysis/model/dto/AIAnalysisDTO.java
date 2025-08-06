@@ -49,7 +49,6 @@ public class AIAnalysisDTO {
     public static class Response {
 
         private Long groupId;
-        private Long analysisId;
         private AnalysisResult analysisResult;
 
         @Getter
@@ -66,7 +65,6 @@ public class AIAnalysisDTO {
 
                 @Getter
                 public static class Place {
-                    private Long placeId;
                     private String placeName;
                     private String placeRoadNameAddress;
                     private List<PlaceImage> placeImageList;
