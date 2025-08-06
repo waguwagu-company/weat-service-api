@@ -22,7 +22,7 @@ public class SwaggerConfig {
                                 .name("waguwagu-company")
                                 .url("https://weat.kro.kr")
                         )
-                ).addServersItem(new Server().url("/"));
+                ).addServersItem(new Server().url("/api"));
     }
 
     @Bean
