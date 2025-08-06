@@ -3,6 +3,7 @@ package com.waguwagu.weat.domain.group.service;
 import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.dto.CreateGroupDTO;
+import com.waguwagu.weat.domain.group.model.dto.GroupResultDTO;
 import com.waguwagu.weat.domain.group.model.dto.JoinGroupDTO;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
@@ -56,5 +57,14 @@ public class GroupService {
         return JoinGroupDTO.Response.builder()
                 .memberId(savedMember.getMemberId())
                 .build();
+    }
+
+
+    public GroupResultDTO.Response getGroupResult(String groupId) {
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new GroupNotFoundException(groupId));
+
+        // 분석 결과 조회
+        return null;
     }
 }

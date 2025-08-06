@@ -3,6 +3,7 @@ package com.waguwagu.weat.domain.group.controller;
 import com.waguwagu.weat.domain.category.model.dto.GetAllCategoryListDTO;
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import com.waguwagu.weat.domain.group.model.dto.CreateGroupDTO;
+import com.waguwagu.weat.domain.group.model.dto.GroupResultDTO;
 import com.waguwagu.weat.domain.group.model.dto.JoinGroupDTO;
 import com.waguwagu.weat.domain.group.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,5 +52,11 @@ public class GroupController {
     @PostMapping("/{groupId}/members")
     public ResponseEntity<ResponseDTO<JoinGroupDTO.Response>> joinGroup(@PathVariable("groupId") String groupId) {
         return ResponseEntity.ok(ResponseDTO.of(groupService.joinGroup(groupId)));
+    }
+
+
+    @PostMapping("/{groupId}/result")
+    public ResponseEntity<ResponseDTO<GroupResultDTO.Response>> getGroupResult(@PathVariable("groupId") String groupId) {
+        return ResponseEntity.ok(ResponseDTO.of(groupService.getGroupResult(groupId)));
     }
 }
