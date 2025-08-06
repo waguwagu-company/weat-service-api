@@ -1,4 +1,4 @@
-package com.waguwagu.weat.domain.analysis.exception;
+package com.waguwagu.weat.domain.category.exception;
 
 import com.waguwagu.weat.domain.common.exception.EntityNotFoundException;
 

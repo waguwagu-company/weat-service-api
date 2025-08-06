@@ -1,6 +1,6 @@
-package com.waguwagu.weat.domain.analysis.model.dto;
+package com.waguwagu.weat.domain.category.model.dto;
 
-import com.waguwagu.weat.domain.analysis.model.entity.Category;
+import com.waguwagu.weat.domain.category.model.entity.Category;
 import lombok.Builder;
 import lombok.Getter;
 
