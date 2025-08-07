@@ -26,8 +26,10 @@ public class GroupService {
     private final GroupMapper groupMapper;
 
     @Transactional
-    public CreateGroupDTO.Response createGroup() {
-        Group group = new Group();
+    public CreateGroupDTO.Response createGroup(CreateGroupDTO.Request request) {
+        Group group = Group.builder()
+                .isSingleMemberGroup(request.isSingleMemberGroup())
+                .build();
         groupRepository.save(group);
 
         Member owner = Member.builder()

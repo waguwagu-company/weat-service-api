@@ -1,23 +1,17 @@
 package com.waguwagu.weat.domain.group.controller;
 
-import com.waguwagu.weat.domain.analysis.model.dto.IsMemberSubmitAnalysisSettingDTO;
-import com.waguwagu.weat.domain.category.model.dto.GetAllCategoryListDTO;
+import com.waguwagu.weat.domain.analysis.model.dto.ValidationDTO;
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
-import com.waguwagu.weat.domain.group.model.dto.CreateGroupDTO;
-import com.waguwagu.weat.domain.group.model.dto.GroupResultDTO;
-import com.waguwagu.weat.domain.group.model.dto.JoinGroupDTO;
+import com.waguwagu.weat.domain.group.model.dto.*;
 import com.waguwagu.weat.domain.group.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/group")
@@ -30,24 +24,44 @@ public class GroupController {
     @Operation(summary = "그룹 생성", description = "그룹을 생성합니다.")
     @ApiResponse(
             responseCode = "200",
-            description = "그룹 생성",
+            description = "성공",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = CreateGroupDTO.Response.class)
+                    schema = @Schema(implementation = CreateGroupDtoResponseWrapper.class)
             )
     )
     @PostMapping("/")
-    public ResponseDTO<CreateGroupDTO.Response> createGroup() {
-        return ResponseDTO.of(groupService.createGroup());
+    public ResponseDTO<CreateGroupDTO.Response> createGroup(@RequestBody CreateGroupDTO.Request request) {
+        return ResponseDTO.of(groupService.createGroup(request));
     }
 
     @Operation(summary = "그룹 참여", description = "생성된 그룹에 참여합니다.")
     @ApiResponse(
             responseCode = "200",
-            description = "그룹 참여",
+            description = "성공",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = JoinGroupDTO.Response.class)
+                    schema = @Schema(implementation = JoinGroupDtoResponseWrapper.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없을 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "해당하는 그룹 없음",
+                                    summary = "존재하지 않는 그룹 식별자",
+                                    value = """
+                                            {
+                                              "code": "GROUP_NOT_FOUND",
+                                              "message": "존재하지 않는 그룹입니다. (groupId: ?)",
+                                              "data": null
+                                            }
+                                            """
+                            )
+                    }
             )
     )
     @PostMapping("/{groupId}/members")
@@ -62,7 +76,27 @@ public class GroupController {
             description = "성공",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = GroupResultDTO.Response.class)
+                    schema = @Schema(implementation = GroupResultDtoResponseWrapper.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없을 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "해당하는 그룹 없음",
+                                    summary = "존재하지 않는 그룹 식별자",
+                                    value = """
+                                            {
+                                              "code": "GROUP_NOT_FOUND",
+                                              "message": "존재하지 않는 그룹입니다. (groupId: ?)",
+                                              "data": null
+                                            }
+                                            """
+                            )
+                    }
             )
     )
     @PostMapping("/{groupId}/result")
