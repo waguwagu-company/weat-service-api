@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.group.controller;
 
+import com.waguwagu.weat.domain.analysis.model.dto.IsMemberSubmitAnalysisSettingDTO;
 import com.waguwagu.weat.domain.category.model.dto.GetAllCategoryListDTO;
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import com.waguwagu.weat.domain.group.model.dto.CreateGroupDTO;
@@ -36,8 +37,8 @@ public class GroupController {
             )
     )
     @PostMapping("/")
-    public ResponseEntity<ResponseDTO<CreateGroupDTO.Response>> createGroup() {
-        return ResponseEntity.ok(ResponseDTO.of(groupService.createGroup()));
+    public ResponseDTO<CreateGroupDTO.Response> createGroup() {
+        return ResponseDTO.of(groupService.createGroup());
     }
 
     @Operation(summary = "그룹 참여", description = "생성된 그룹에 참여합니다.")
@@ -50,13 +51,22 @@ public class GroupController {
             )
     )
     @PostMapping("/{groupId}/members")
-    public ResponseEntity<ResponseDTO<JoinGroupDTO.Response>> joinGroup(@PathVariable("groupId") String groupId) {
-        return ResponseEntity.ok(ResponseDTO.of(groupService.joinGroup(groupId)));
+    public ResponseDTO<JoinGroupDTO.Response> joinGroup(@PathVariable("groupId") String groupId) {
+        return ResponseDTO.of(groupService.joinGroup(groupId));
     }
 
 
+    @Operation(summary = "분석 결과 조회", description = "그룹별 분석 결과 조회")
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = GroupResultDTO.Response.class)
+            )
+    )
     @PostMapping("/{groupId}/result")
-    public ResponseEntity<ResponseDTO<GroupResultDTO.Response>> getGroupResult(@PathVariable("groupId") String groupId) {
-        return ResponseEntity.ok(ResponseDTO.of(groupService.getGroupResult(groupId)));
+    public ResponseDTO<GroupResultDTO.Response> getGroupResult(@PathVariable("groupId") String groupId) {
+        return ResponseDTO.of(groupService.getGroupResult(groupId));
     }
 }

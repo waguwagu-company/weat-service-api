@@ -11,5 +11,7 @@ import java.util.List;
 @Schema(name = "장소 이미지", description = "장소 이미지 DTO")
 @AllArgsConstructor
 public class PlaceImageDTO {
+
+    @Schema(description = "이미지 경로")
     private String imageUrl;
 }
