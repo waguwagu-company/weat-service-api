@@ -21,9 +21,11 @@ public class SubmitAnalysisSettingDTO {
         @Schema(description = "제출한 회원 식별자", example = "1")
         private Long memberId;
 
-        @Schema(description = "위치 설정")
+        @NotNull
+        @Schema(description = "위치 설정(좌표/도로명주소)")
         private LocationSetting locationSetting;
 
+        @NotNull
         @Schema(description = "카테고리 설정 리스트")
         private List<CategorySetting> categorySettingList;
 
@@ -61,7 +63,7 @@ public class SubmitAnalysisSettingDTO {
         @Getter
         @Schema(description = "입력 텍스트 설정")
         public static class TextInputSetting {
-            @Schema(description = "입력 텍스트", example = "오늘 날씨 어때?")
+            @Schema(description = "입력 텍스트", example = "혼잡하지 않고 조용한 분위기의 음식점을 원해요")
             private String inputText;
         }
     }

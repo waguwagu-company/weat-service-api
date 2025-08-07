@@ -5,7 +5,5 @@ import lombok.Getter;
 import lombok.Setter;
 
 
-@Getter
-@Setter
 public class SubmitAnalysisSettingDtoResponseWrapper extends ResponseDTO<SubmitAnalysisSettingDTO.Response> {
 }

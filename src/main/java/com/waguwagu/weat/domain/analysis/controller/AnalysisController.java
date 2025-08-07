@@ -5,6 +5,7 @@ import com.waguwagu.weat.domain.analysis.service.AnalysisService;
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,7 +26,45 @@ public class AnalysisController {
             description = "성공",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = SubmitAnalysisSettingDTO.Response.class)
+                    schema = @Schema(implementation = SubmitAnalysisSettingDtoResponseWrapper.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "208",
+            description = "이미 분석 설정을 제출한 멤버일 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "이미 제출됨",
+                            summary = "이미 제출한 회원입니다.",
+                            value = """
+                                    {
+                                      "code": "MEMBER_ALREADY_SUBMIT_SETTING",
+                                      "message": "이미 제출한 회원입니다.",
+                                      "data": null
+                                    }
+                                    """
+                    )
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없을 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "해당하는 멤버 없음",
+                                    summary = "존재하지 않는 멤버 식별자",
+                                    value = """
+                                            {
+                                              "code": "MEMBER_NOT_FOUND",
+                                              "message": "존재하지 않는 멤버입니다. (memberId: ?)",
+                                              "data": null
+                                            }
+                                            """
+                            )
+                    }
             )
     )
     @PostMapping("/settings")
@@ -44,13 +83,33 @@ public class AnalysisController {
                     schema = @Schema(implementation = IsMemberSubmitAnalysisSettingDTO.Response.class)
             )
     )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없을 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "해당하는 멤버 없음",
+                                    summary = "존재하지 않는 멤버 식별자",
+                                    value = """
+                                            {
+                                              "code": "MEMBER_NOT_FOUND",
+                                              "message": "존재하지 않는 멤버입니다. (memberId: ?)",
+                                              "data": null
+                                            }
+                                            """
+                            )
+                    }
+            )
+    )
     @GetMapping(value = "/settings/status")
     public ResponseDTO<IsMemberSubmitAnalysisSettingDTO.Response> isMemberSubmitAnalysisSetting(@RequestParam("memberId") Long memberId) {
         return ResponseDTO.of(analysisService.isMemberSubmitAnalysisSetting(memberId));
     }
 
-
-    @Operation(summary = "분석 시작가능조건 충족 여부 조회", description = "분석을 시작할 수 있는 조건을 만족했는지 여부를 조회합니다.")
+    @Operation(summary = "분석 상태 조회", description =
+            "그룹별로 분석 시작 가능 여부, 분석 시작 여부 등 분석의 전반적인 상태를 조회한다.\n\n")
     @ApiResponse(
             responseCode = "200",
             description = "성공",
@@ -59,23 +118,105 @@ public class AnalysisController {
                     schema = @Schema(implementation = IsAnalysisStartAvailableDtoResponseWrapper.class)
             )
     )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없을 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "해당하는 그룹 없음",
+                            summary = "존재하지 않는 그룹 식별자",
+                            value = """
+                                    {
+                                      "code": "GROUP_NOT_FOUND",
+                                      "message": "존재하지 않는 그룹입니다. (groupId: ?)",
+                                      "data": null
+                                    }
+                                    """
+                    )
+            )
+    )
     @GetMapping("/status")
     public ResponseDTO<IsAnalysisStartAvailableDTO.Response> isAnalysisStartAvailable(@RequestParam("groupId") String groupId) {
         return ResponseDTO.of(analysisService.isAnalysisStartAvailable(groupId));
     }
 
     // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
-    @Operation(summary = "분석 시작 요청", description = "분석 시작 조건을 충족한 경우, 요청시점까지 제출된 분석설정을 활용하여 분석을 진행한다.")
+    @Operation(summary = "분석 시작 요청", description = "분석 시작 조건을 충족한 경우, 요청시점까지 제출된 분석설정을 활용하여 분석을 진행한다.\n" +
+            "- 단체로 참여하는 경우 `2명 이상이 분석 설정을 제출`해야만 분석을 시작할 수 있다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "분석 시작 요청 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = AnalysisStartDTOResponseWrapper.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "208",
+            description = "이미 분석이 시작된 그룹일 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "이미 시작됨",
+                            summary = "분석이 이미 시작된 그룹",
+                            value = """
+                                    {
+                                      "code": "ANALYSIS_ALREADY_STARTED",
+                                      "message": "이미 진행중인 분석입니다.",
+                                      "data": null
+                                    }
+                                    """
+                    )
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "분석 시작 조건 불충족",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "분석 조건 불충족",
+                            summary = "제출된 설정이 부족함",
+                            value = """
+                                    {
+                                      "code": "ANALYSIS_CONDITION_NOT_SATISFIED",
+                                      "message": "분석 시작 조건이 충족되지 않았습니다.",
+                                      "data": null
+                                    }
+                                    """
+                    )
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없음",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "GROUP_NOT_FOUND",
+                                    summary = "존재하지 않는 그룹 ID",
+                                    value = """
+                                            {
+                                              "code": "GROUP_NOT_FOUND",
+                                              "message": "존재하지 않는 그룹입니다. (groupId: ?)",
+                                              "data": null
+                                            }
+                                            """
+                            )
+                    }
+            )
+    )
     @PostMapping
-    public ResponseDTO<AnalysisStartDTO.Response> analysisStart(@RequestBody AnalysisStartDTO.Request request){
+    public ResponseDTO<AnalysisStartDTO.Response> analysisStart(@RequestBody AnalysisStartDTO.Request request) {
         return ResponseDTO.of(analysisService.analysisStart(request.getGroupId()));
     }
 
 
-
     @Operation(summary = "사용자 입력값 유효성 검증", description = "사용자가 입력한 값의 유효성을 검증한다.")
     @PostMapping("/validation/input")
-    public ResponseDTO<ValidationDTO.Response> validateInput(@RequestBody ValidationDTO.Request request){
+    public ResponseDTO<ValidationDTO.Response> validateInput(@RequestBody ValidationDTO.Request request) {
         return ResponseDTO.of(analysisService.validateInput(request));
     }
 }
