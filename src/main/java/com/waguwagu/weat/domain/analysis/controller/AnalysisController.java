@@ -210,7 +210,7 @@ public class AnalysisController {
     )
     @PostMapping
     public ResponseDTO<AnalysisStartDTO.Response> analysisStart(@RequestBody AnalysisStartDTO.Request request) {
-        return ResponseDTO.of(analysisService.analysisStart(request.getGroupId()));
+        return ResponseDTO.of(analysisService.analysisStart(request));
     }
 
 

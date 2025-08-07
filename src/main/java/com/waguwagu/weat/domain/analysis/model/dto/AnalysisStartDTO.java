@@ -13,6 +13,9 @@ public class AnalysisStartDTO {
     public static class Request {
         @Schema(description = "그룹 식별자", example = "f5d8931a830e41968663ce0dc12bf9b2")
         private String groupId;
+
+        @Schema(description = "개인으로 참여 여부", example = "false")
+        private Boolean isIndividualAnalysis;
     }
 
     @Getter

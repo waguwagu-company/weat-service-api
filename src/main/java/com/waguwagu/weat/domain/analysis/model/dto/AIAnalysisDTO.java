@@ -48,7 +48,7 @@ public class AIAnalysisDTO {
     @Getter
     public static class Response {
 
-        private Long groupId;
+        private String groupId;
         private AnalysisResult analysisResult;
 
         @Getter

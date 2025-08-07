@@ -13,6 +13,8 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", "존재하지 않는 카테고리입니다."),
     ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS_NOT_FOUND", "존재하지 않는 분석입니다."),
     MEMBER_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "GROUP_MEMBER_LIMIT", "그룹 정원을 초과했습니다."),
+    MEMBER_ALREADY_SUBMIT_SETTING(HttpStatus.ALREADY_REPORTED, "MEMBER_ALREADY_SUBMIT_SETTING", "이미 제출한 회원입니다."),
+    ANALYSIS_CONDITION_NOT_SATISFIED(HttpStatus.BAD_REQUEST, "ANALYSIS_CONDITION_NOT_SATISFIED","분석 시작 조건이 충족되지 않았습니다." ),
     ANALYSIS_ALREADY_STARTED(HttpStatus.ALREADY_REPORTED, "ANALYSIS_ALREADY_STARTED", "이미 진행중인 분석입니다.");
 
     private final String code;
