@@ -19,8 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -29,9 +27,6 @@ import java.util.concurrent.Executors;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class AnalysisService {
-
-
-    private final Executor analysisServiceExcutor = Executors.newFixedThreadPool(10);
 
     private final PlaceRepository placeRepository;
     private final AIServiceAdaptor aiServiceAdaptor;
@@ -46,6 +41,7 @@ public class AnalysisService {
     private final AnalysisSettingRepository analysisSettingRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
+    private final AnalysisAsyncExecutor analysisAsyncExecutor;
 
     // 분석 시작가능조건 충족여부 및 분석상태 조회
     public IsAnalysisStartAvailableDTO.Response isAnalysisStartAvailable(String groupId) {
@@ -194,84 +190,7 @@ public class AnalysisService {
         analysis.setAnalysisStatus(AnalysisStatus.IN_PROGRESS);
 
         // 비동기로 AI 분석서비스에 분석 요청
-        CompletableFuture.runAsync(() -> {
-            try {
-                AIAnalysisDTO.Response response =
-                        aiServiceAdaptor.requestAnalysis(AIAnalysisDTO.Request.builder().groupId(groupId).build());
-
-                log.info("response => {}", response.toString());
-                /**
-                 *  TODO: AI 분석 성공 후 후처리
-                 *  analysis.setAnalysisStatus(AnalysisStatus.COMPLETED);
-                 *  analysisRepository.save(analysis);
-                 *
-                 */
-
-                // TODO: 분석 결과 생성
-                AnalysisResult analysisResult =
-                        analysisResultRepository.save(AnalysisResult.builder()
-                                .group(group)
-                                .analysis(analysis)
-                                .build());
-
-                var resultAnalysisDetailList = response.getAnalysisResult().getAnalysisResultDetailList();
-
-                for (var analysisDetail : resultAnalysisDetailList) {
-                    // TODO: 장소 테이블에 데이터 삽입
-                    var placeInfo = analysisDetail.getPlace();
-
-                    Place place = placeRepository.save(Place.builder()
-                            .placeName(placeInfo.getPlaceName())
-                            .placeRoadnameAddress(placeInfo.getPlaceRoadNameAddress())
-                            .build());
-
-                    // TODO: 장소이미지 테이블에 데이터 삽입
-                    var placeImageInfoList = placeInfo.getPlaceImageList();
-
-                    for (var placeImageInfo : placeImageInfoList) {
-                        PlaceImage placeImage = PlaceImage.builder()
-                                .place(place)
-                                .placeImageUrl(placeImageInfo.getPlaceImageUrl())
-                                .placeImageData(placeImageInfo.getPlaceImageData())
-                                .build();
-
-                        placeImageRepository.save(placeImage);
-                    }
-
-                    // TODO: 분석결과상세 테이블에 데이터 삽입
-                    var analysisResultDetailContent = analysisDetail.getAnalysisResultDetailContent();
-                    AnalysisResultDetail analysisResultDetail =
-                            analysisResultDetailRepository.save(AnalysisResultDetail.builder()
-                                    .analysisResult(analysisResult)
-                                    .analysisResultDetailContent(analysisResultDetailContent)
-                                    .place(place)
-                                    .build());
-
-                    // TODO: 분석근거 테이블에 데이터 삽입
-                    var analysisBasisInfoList = analysisDetail.getAnalysisBasisList();
-                    for (var analysisBasisInfo : analysisBasisInfoList) {
-                        AnalysisBasis analysisBasis =
-                                analysisBasisRepository.save(AnalysisBasis.builder()
-                                        .analysisResultDetail(analysisResultDetail)
-                                        .analysisBasisType(analysisBasisInfo.getAnalysisBasisType())
-                                        .analysisBasisContent(analysisBasisInfo.getAnalysisBasisContent())
-                                        .build());
-                    }
-
-                    // TODO: 분석 완료 처리
-                    analysis.setAnalysisStatus(AnalysisStatus.COMPLETED);
-
-                }
-
-            } catch (Exception e) {
-                /**
-                 * TODO: AI 분석 실패 시 처리
-                 * analysis.setAnalysisStatus(AnalysisStatus.FAILED);
-                 * analysisRepository.save(analysis);
-                 */
-                analysis.setAnalysisStatus(AnalysisStatus.FAILED);
-            }
-        }, analysisServiceExcutor);
+        analysisAsyncExecutor.startAnalysisAsync(group, analysis);
 
         return AnalysisStartDTO.Response.builder()
                 .groupId(group.getGroupId())
