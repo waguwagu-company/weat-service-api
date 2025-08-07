@@ -26,10 +26,7 @@ public class AIServiceAdaptor {
 
     private final RestTemplate aiRestTemplate;
 
-    private final WebClient webClient = WebClient.builder()
-            .baseUrl(baseURL)
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .build();
+    private final WebClient aiWebClient;
 
 
     public AIAnalysisDTO.Response requestAnalysis(AIAnalysisDTO.Request payload) {
@@ -57,7 +54,7 @@ public class AIServiceAdaptor {
     }
 
     public ValidationDTO.Response requestValidation(ValidationDTO.Request payload) {
-        return webClient.post()
+        return aiWebClient.post()
                 .uri(validationUri)
                 .bodyValue(payload)
                 .retrieve()

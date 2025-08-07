@@ -1,8 +1,6 @@
 package com.waguwagu.weat.domain.analysis.model.dto;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,9 +14,9 @@ public class ValidationDTO {
     }
 
     @Getter
-    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Response {
-
         private boolean isValid;
         private String AIMessage;
     }
