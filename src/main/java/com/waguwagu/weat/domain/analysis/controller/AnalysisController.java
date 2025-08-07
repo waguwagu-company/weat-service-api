@@ -216,6 +216,15 @@ public class AnalysisController {
 
     @Operation(summary = "사용자 입력값 유효성 검증", description = "사용자가 입력한 값의 유효성을 검증한다.")
     @PostMapping("/validation/input")
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ValidationDTOResponseWrapper.class)
+            )
+    )
+    // TODO: 예외 케이스... 생각...
     public ResponseDTO<ValidationDTO.Response> validateInput(@RequestBody ValidationDTO.Request request) {
         return ResponseDTO.of(analysisService.validateInput(request));
     }
