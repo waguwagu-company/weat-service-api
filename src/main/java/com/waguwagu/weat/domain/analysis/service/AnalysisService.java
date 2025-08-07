@@ -1,10 +1,7 @@
 package com.waguwagu.weat.domain.analysis.service;
 
 import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
-import com.waguwagu.weat.domain.analysis.exception.AnalysisAlreadyStartedForGroupIdException;
-import com.waguwagu.weat.domain.analysis.exception.AnalysisConditionNotSatisfiedForGroupIdException;
-import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
-import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
+import com.waguwagu.weat.domain.analysis.exception.*;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
@@ -20,11 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -112,7 +107,7 @@ public class AnalysisService {
 
         // 이미 제출한 회원인 경우
         if(isMemberSubmitAnalysisSetting(requestDto.getMemberId()).isSubmitted()){
-           // 208 응답
+            throw new MemberAlreadySubmitSettingForMemberIdException(member.getMemberId());
         }
 
         // 분석 정보 조회, 없는 경우 생성
