@@ -1,16 +1,25 @@
 package com.waguwagu.weat.domain.analysis.service;
 
 import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
+import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
+import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
 import com.waguwagu.weat.domain.analysis.model.dto.AIAnalysisDTO;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
+import com.waguwagu.weat.domain.category.model.entity.Category;
+import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.entity.Group;
+import com.waguwagu.weat.domain.group.model.entity.Member;
+import com.waguwagu.weat.domain.group.repository.GroupRepository;
+import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -26,21 +35,28 @@ public class AnalysisAsyncExecutor {
     private final AnalysisBasisRepository analysisBasisRepository;
     private final AnalysisRepository analysisRepository;
     private final PlatformTransactionManager transactionManager;
+    private final GroupRepository groupRepository;
 
     // TODO: 추후 스레드 풀 설정
-    public void startAnalysisAsync(Group group, Analysis analysis) {
+    public void startAnalysisAsync(AIAnalysisDTO.Request request) {
         CompletableFuture.runAsync(() -> {
 
+            Group group = groupRepository.findById(request.getGroupId())
+                    .orElseThrow(() -> new GroupNotFoundException(request.getGroupId()));
+
+            Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId())
+                    .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
+
             TransactionTemplate tx = new TransactionTemplate(transactionManager);
+            log.info("request => {}", request);
 
             try {
                 AIAnalysisDTO.Response response =
-                        aiServiceAdaptor.requestAnalysis(AIAnalysisDTO.Request.builder()
-                                .groupId(group.getGroupId())
-                                .build());
+                        aiServiceAdaptor.requestAnalysis(request);
 
                 log.info("response => {}", response);
 
+                // 트랜잭션 시작
                 tx.executeWithoutResult(status -> {
                     // 결과 저장
                     AnalysisResult result = analysisResultRepository.save(
@@ -64,7 +80,6 @@ public class AnalysisAsyncExecutor {
                                 placeImageRepository.save(PlaceImage.builder()
                                         .place(place)
                                         .placeImageUrl(image.getPlaceImageUrl())
-                                        .placeImageData(image.getPlaceImageData())
                                         .build());
                             }
                         }

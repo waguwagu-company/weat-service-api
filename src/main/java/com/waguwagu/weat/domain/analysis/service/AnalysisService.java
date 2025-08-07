@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -42,6 +43,9 @@ public class AnalysisService {
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
     private final AnalysisAsyncExecutor analysisAsyncExecutor;
+    private final TextInputSettingRepository textInputSettingRepository;
+    private final LocationSettingRepository locationSettingRepository;
+    private final CategorySettingRepository categorySettingRepository;
 
     // 분석 시작가능조건 충족여부 및 분석상태 조회
     public IsAnalysisStartAvailableDTO.Response isAnalysisStartAvailable(String groupId) {
@@ -96,7 +100,7 @@ public class AnalysisService {
                 .orElseThrow(() -> new MemberNotFoundException(requestDto.getMemberId()));
 
         // 이미 제출한 회원인 경우
-        if(isMemberSubmitAnalysisSetting(requestDto.getMemberId()).isSubmitted()){
+        if (isMemberSubmitAnalysisSetting(requestDto.getMemberId()).isSubmitted()) {
             throw new MemberAlreadySubmitSettingForMemberIdException(member.getMemberId());
         }
 
@@ -189,8 +193,52 @@ public class AnalysisService {
         // 진행중이지 않다면, "진행중" 상태로 변경
         analysis.setAnalysisStatus(AnalysisStatus.IN_PROGRESS);
 
+        // 그룹 내의 모든 멤버 조회
+        List<Member> groupMemberList = memberRepository.findAllByGroupGroupId(group.getGroupId());
+
+        List<AIAnalysisDTO.Request.MemberSetting> memberSettingList = new ArrayList<>();
+
+
+        // 각 멤버별 설정 값 조회
+        for (Member groupMember : groupMemberList) {
+            // 위치 설정
+            LocationSetting locationSetting = locationSettingRepository.findByMemberId(groupMember.getMemberId());
+
+            // 카테고리 설정
+            List<CategorySetting> categorySettingList = categorySettingRepository.findAllByMemberId(groupMember.getMemberId());
+
+            List<AIAnalysisDTO.Request.MemberSetting.Category> memberSettingCategoryList = new ArrayList<>();
+
+            for (CategorySetting categorySetting : categorySettingList) {
+                memberSettingCategoryList.add(
+                        AIAnalysisDTO.Request.MemberSetting.Category.builder()
+                                .categoryId(categorySetting.getCategory().getCategoryId())
+                                .categoryName(categorySetting.getCategory().getCategoryName())
+                                .build()
+                );
+            }
+
+            // 입력 설정
+            TextInputSetting textInputSetting = textInputSettingRepository.findByMemberId(groupMember.getMemberId());
+
+            AIAnalysisDTO.Request.MemberSetting memberSetting =
+                    AIAnalysisDTO.Request.MemberSetting.builder()
+                            .memberId(groupMember.getMemberId())
+                            .xPosition(locationSetting.getXPosition())
+                            .yPosition(locationSetting.getYPosition())
+                            .categoryList(memberSettingCategoryList) // TODO
+                            .inputText(textInputSetting.getInputText())
+                            .build();
+
+            memberSettingList.add(memberSetting);
+        }
+
+
         // 비동기로 AI 분석서비스에 분석 요청
-        analysisAsyncExecutor.startAnalysisAsync(group, analysis);
+        analysisAsyncExecutor.startAnalysisAsync(AIAnalysisDTO.Request.builder()
+                .groupId(group.getGroupId())
+                .memberSettingList(memberSettingList)
+                .build());
 
         return AnalysisStartDTO.Response.builder()
                 .groupId(group.getGroupId())
