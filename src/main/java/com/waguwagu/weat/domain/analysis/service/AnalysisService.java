@@ -2,6 +2,7 @@ package com.waguwagu.weat.domain.analysis.service;
 
 import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisAlreadyStartedForGroupIdException;
+import com.waguwagu.weat.domain.analysis.exception.AnalysisConditionNotSatisfiedForGroupIdException;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
 import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
@@ -109,6 +110,11 @@ public class AnalysisService {
         Member member = memberRepository.findById(requestDto.getMemberId())
                 .orElseThrow(() -> new MemberNotFoundException(requestDto.getMemberId()));
 
+        // 이미 제출한 회원인 경우
+        if(isMemberSubmitAnalysisSetting(requestDto.getMemberId()).isSubmitted()){
+           // 208 응답
+        }
+
         // 분석 정보 조회, 없는 경우 생성
         Analysis analysis = analysisRepository.findByGroupGroupId(member.getGroup().getGroupId())
                 .orElseGet(() -> {
@@ -166,16 +172,17 @@ public class AnalysisService {
 
     // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
     @Transactional
-    public AnalysisStartDTO.Response analysisStart(String groupId) {
+    public AnalysisStartDTO.Response analysisStart(AnalysisStartDTO.Request request) {
 
+        var groupId = request.getGroupId();
         var analysisStartAvailable = isAnalysisStartAvailable(groupId);
 
         if (analysisStartAvailable.getIsAnalysisStarted()) {
-            throw new RuntimeException("이미 시작된 분석입니다.");
+            throw new AnalysisAlreadyStartedForGroupIdException(groupId);
         }
 
-        if (!isAnalysisStartAvailable(groupId).getIsAnalysisStartConditionSatisfied()) {
-            throw new RuntimeException("분석 조건을 만족하지 않았습니다.");
+        if (!request.getIsIndividualAnalysis() && !isAnalysisStartAvailable(groupId).getIsAnalysisStartConditionSatisfied()) {
+            throw new AnalysisConditionNotSatisfiedForGroupIdException(groupId);
         }
 
         // 그룹 조회
