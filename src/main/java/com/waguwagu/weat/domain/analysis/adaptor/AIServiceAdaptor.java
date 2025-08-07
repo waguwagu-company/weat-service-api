@@ -2,25 +2,38 @@ package com.waguwagu.weat.domain.analysis.adaptor;
 
 import com.waguwagu.weat.domain.analysis.model.dto.AIAnalysisDTO;
 
+import com.waguwagu.weat.domain.analysis.model.dto.ValidationDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class AIServiceAdaptor {
-
-    private final RestTemplate aiRestTemplate;
-
     @Value("${ai.service.base-url}")
     private String baseURL;
 
+    @Value("${ai.service.uri.analysis}")
+    private String analysisUri;
+
+    @Value("${ai.service.uri.validation}")
+    private String validationUri;
+
+    private final RestTemplate aiRestTemplate;
+
+    private final WebClient webClient = WebClient.builder()
+            .baseUrl(baseURL)
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+
+
     public AIAnalysisDTO.Response requestAnalysis(AIAnalysisDTO.Request payload) {
-        String url = baseURL + "/api/analyze";
+        String url = baseURL + analysisUri;
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -42,4 +55,14 @@ public class AIServiceAdaptor {
             throw new RuntimeException("AI 분석 요청 중 오류 발생", e);
         }
     }
+
+    public ValidationDTO.Response requestValidation(ValidationDTO.Request payload) {
+        return webClient.post()
+                .uri(validationUri)
+                .bodyValue(payload)
+                .retrieve()
+                .bodyToMono(ValidationDTO.Response.class)
+                .block();
+    }
+
 }

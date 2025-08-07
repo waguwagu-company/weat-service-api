@@ -15,11 +15,8 @@ import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,17 +30,12 @@ import java.util.concurrent.Executors;
 @RequiredArgsConstructor
 public class AnalysisService {
 
-    // TODO: 테스트용 - url은 yml에 추가
-    private final WebClient webClient = WebClient.builder()
-            .baseUrl("https://weat.kro.kr/ai") // 실제 AI 서버 주소
-            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-            .build();
-
 
     private final Executor analysisServiceExcutor = Executors.newFixedThreadPool(10);
 
     private final PlaceRepository placeRepository;
     private final AIServiceAdaptor aiServiceAdaptor;
+
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
@@ -285,12 +277,6 @@ public class AnalysisService {
     }
 
     public ValidationDTO.Response validateInput(ValidationDTO.Request request) {
-        // TODO: 테스트용 - 공통 메서드로 빼기
-        return webClient.post()
-                .uri("/validate")
-                .bodyValue(request)
-                .retrieve()
-                .bodyToMono(ValidationDTO.Response.class)
-                .block();
+        return aiServiceAdaptor.requestValidation(request);
     }
 }
