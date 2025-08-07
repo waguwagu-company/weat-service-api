@@ -1,6 +1,5 @@
 package com.waguwagu.weat.domain.group.controller;
 
-import com.waguwagu.weat.domain.analysis.model.dto.ValidationDTO;
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import com.waguwagu.weat.domain.group.model.dto.*;
 import com.waguwagu.weat.domain.group.service.GroupService;

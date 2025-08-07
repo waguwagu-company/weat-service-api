@@ -10,7 +10,6 @@ import lombok.Getter;
 @Schema(description = "그룹 생성 DTO")
 public class CreateGroupDTO {
 
-    @Builder
     @Getter
     public static class Request {
         @JsonProperty("isSingleMemberGroup")
