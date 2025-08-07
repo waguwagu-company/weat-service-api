@@ -22,8 +22,4 @@ public class PlaceImage {
 
     @Column(name = "place_image_url", columnDefinition = "text")
     private String placeImageUrl;
-
-    @Lob
-    @Column(name = "place_image_data")
-    private Byte[] placeImageData;
 }
