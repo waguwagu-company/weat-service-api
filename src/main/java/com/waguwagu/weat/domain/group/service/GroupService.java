@@ -70,16 +70,15 @@ public class GroupService {
                 .orElseThrow(() -> new GroupNotFoundException(groupId));
 
         // 분석 결과 조회
-        List<GroupResultQueryDTO> queryResult = groupMapper.selectGroupAnalysisResult(groupId);
+        List<GroupResultQueryDTO> queryResult = groupMapper.selectGroupAnalysisResult(groupEntity.getGroupId());
 
         List<GroupResultDetailDTO> result = queryResult.stream()
                 .collect(Collectors.groupingBy(GroupResultQueryDTO::getPlaceId, LinkedHashMap::new, Collectors.toList()))
-                .entrySet().stream()
-                .map(entry -> {
-                    List<GroupResultQueryDTO> group = entry.getValue();
+                .values().stream()
+                .map(group -> {
                     GroupResultQueryDTO first = group.get(0);
 
-                    GroupResultDetailDTO dto = GroupResultDetailDTO.builder()
+                    GroupResultDetailDTO detailDTO = GroupResultDetailDTO.builder()
                             .placeId(first.getPlaceId())
                             .placeName(first.getPlaceName())
                             .placeAddress(first.getPlaceRoadnameAddress())
@@ -91,13 +90,12 @@ public class GroupService {
                             .map(g -> new PlaceImageDTO(g.getPlaceImageUrl()))
                             .collect(Collectors.toList());
 
-                    dto.setPlaceImageList(imageList);
-                    return dto;
+                    detailDTO.setPlaceImageList(imageList);
+                    return detailDTO;
                 })
                 .toList();
 
 
-
-        return null;
+        return new GroupResultDTO.Response(result);
     }
 }
