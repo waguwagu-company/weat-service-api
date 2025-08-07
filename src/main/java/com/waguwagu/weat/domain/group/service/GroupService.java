@@ -12,8 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -68,36 +70,41 @@ public class GroupService {
 
 
     public GroupResultDTO.Response getGroupResult(String groupId) {
-        Group groupEntity = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GroupNotFoundException(groupId));
+        List<GroupAnalysisBasisQueryDTO> basisRows = groupMapper.selectGroupAnalysisBasis(groupId);
+        List<PlaceImageQueryDTO> imageRows = groupMapper.selectGroupPlaceImages(groupId);
 
-        // 분석 결과 조회
-        List<GroupResultQueryDTO> queryResult = groupMapper.selectGroupAnalysisResult(groupEntity.getGroupId());
+        // 이미지 맵 구성 (placeId -> 이미지 리스트)
+        Map<Long, List<PlaceImageDTO>> imageMap = imageRows.stream()
+                .collect(Collectors.groupingBy(
+                        PlaceImageQueryDTO::getPlaceId,
+                        Collectors.mapping(img -> new PlaceImageDTO(img.getPlaceImageUrl()), Collectors.toList())
+                ));
 
-        List<GroupResultDetailDTO> result = queryResult.stream()
-                .collect(Collectors.groupingBy(GroupResultQueryDTO::getPlaceId, LinkedHashMap::new, Collectors.toList()))
+        List<GroupResultDetailDTO> result = basisRows.stream()
+                .collect(Collectors.groupingBy(GroupAnalysisBasisQueryDTO::getPlaceId, LinkedHashMap::new, Collectors.toList()))
                 .values().stream()
                 .map(group -> {
-                    GroupResultQueryDTO first = group.get(0);
+                    GroupAnalysisBasisQueryDTO first = group.get(0);
 
-                    GroupResultDetailDTO detailDTO = GroupResultDetailDTO.builder()
+                    List<AnalysisBasisDTO> analysisBasisList = group.stream()
+                            .map(g -> new AnalysisBasisDTO(g.getAnalysisBasisType(), g.getAnalysisBasisContent()))
+                            .distinct()
+                            .collect(Collectors.toList());
+
+                    List<PlaceImageDTO> placeImageList = imageMap.getOrDefault(first.getPlaceId(), Collections.emptyList());
+
+                    return GroupResultDetailDTO.builder()
                             .placeId(first.getPlaceId())
                             .placeName(first.getPlaceName())
                             .placeAddress(first.getPlaceRoadnameAddress())
-                            .analysisBasisContent(first.getAnalysisBasisContent())
                             .analysisResultContent(first.getAnalysisResultDetailContent())
+                            .analysisBasisList(analysisBasisList)
+                            .placeImageList(placeImageList)
                             .build();
-
-                    List<PlaceImageDTO> imageList = group.stream()
-                            .map(g -> new PlaceImageDTO(g.getPlaceImageUrl()))
-                            .collect(Collectors.toList());
-
-                    detailDTO.setPlaceImageList(imageList);
-                    return detailDTO;
                 })
                 .toList();
 
-
         return new GroupResultDTO.Response(result);
     }
+
 }

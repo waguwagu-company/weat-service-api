@@ -9,6 +9,7 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Schema(name = "그룹별 분석 상세 DTO", description = "그룹별 분석 상세 DTO")
 public class GroupResultDetailDTO {
 
     @Schema(description = "장소 식별자")
@@ -24,7 +25,7 @@ public class GroupResultDetailDTO {
     private String analysisResultContent;
 
     @Schema(description = "분석 근거 내용 - 리뷰 or AI 추천 멘트")
-    private String analysisBasisContent;
+    List<AnalysisBasisDTO> analysisBasisList;
 
     @Schema(description = "장소 이미지 목록")
     @Setter

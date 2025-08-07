@@ -1,11 +1,12 @@
 package com.waguwagu.weat.domain.group.model.dto;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@Tag(name = "Create Group DTO")
+@Schema(name = "분석 결과 쿼리 DTO", description = "분석 결과 쿼리 DTO")
 public class GroupResultQueryDTO {
 
     private String analysisResultDetailContent;  // 분석 결과 상세 내용
