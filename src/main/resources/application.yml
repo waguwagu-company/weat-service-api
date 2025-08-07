@@ -36,5 +36,6 @@ ai:
      uri:
        validation: /api/validate
        analysis: /api/analyze
+
 mybatis:
   mapper-locations: classpath:mapper/**/*.xml
