@@ -70,4 +70,12 @@ public class AnalysisController {
     public ResponseDTO<AnalysisStartDTO.Response> analysisStart(@RequestBody AnalysisStartDTO.Request request){
         return ResponseDTO.of(analysisService.analysisStart(request.getGroupId()));
     }
+
+
+
+    @Operation(summary = "사용자 입력값 유효성 검증", description = "사용자가 입력한 값의 유효성을 검증한다.")
+    @PostMapping("/validation/input")
+    public ResponseDTO<ValidationDTO.Response> validateInput(@RequestBody ValidationDTO.Request request){
+        return ResponseDTO.of(analysisService.validateInput(request));
+    }
 }
