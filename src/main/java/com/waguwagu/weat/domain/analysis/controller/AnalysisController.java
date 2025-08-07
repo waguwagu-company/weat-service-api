@@ -83,6 +83,26 @@ public class AnalysisController {
                     schema = @Schema(implementation = IsMemberSubmitAnalysisSettingDTO.Response.class)
             )
     )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없을 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "해당하는 멤버 없음",
+                                    summary = "존재하지 않는 멤버 식별자",
+                                    value = """
+                                            {
+                                              "code": "MEMBER_NOT_FOUND",
+                                              "message": "존재하지 않는 멤버입니다. (memberId: ?)",
+                                              "data": null
+                                            }
+                                            """
+                            )
+                    }
+            )
+    )
     @GetMapping(value = "/settings/status")
     public ResponseDTO<IsMemberSubmitAnalysisSettingDTO.Response> isMemberSubmitAnalysisSetting(@RequestParam("memberId") Long memberId) {
         return ResponseDTO.of(analysisService.isMemberSubmitAnalysisSetting(memberId));
