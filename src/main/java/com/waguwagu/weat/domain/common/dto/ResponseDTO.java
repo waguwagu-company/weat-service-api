@@ -14,10 +14,10 @@ import lombok.NoArgsConstructor;
 @Schema(description = "공통 응답 DTO")
 public class ResponseDTO<T> {
 
-    @Schema(description = "응답 코드", example = "GROUP_NOT_FOUND")
+    @Schema(description = "응답 코드", example = "SUCCESS")
     private String code;
     
-    @Schema(description = "응답 메시지", example = "SUCCESS")
+    @Schema(description = "응답 메시지", example = "요청이 성공적으로 처리되었습니다.")
     private String message;
     
     @Schema(description = "응답 데이터")

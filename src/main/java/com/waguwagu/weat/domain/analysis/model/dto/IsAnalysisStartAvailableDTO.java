@@ -13,17 +13,18 @@ public class IsAnalysisStartAvailableDTO {
     @Setter
     @Builder
     public static class Response {
-        @Schema(description = "대상 그룹 식별자")
+        @Schema(description = "대상 그룹 식별자", example = "f5d8931a830e41968663ce0dc12bf9b2")
         private String groupId;
 
-        @Schema(description = "제출 수")
+        @Schema(description = "그룹 내 설정을 제출한 멤버 수", example = "2")
         private int submittedCount;
 
         @Schema(description = "분석 시작 가능 여부", example = "true")
         @JsonProperty("isAnalysisStartConditionSatisfied")
         private Boolean isAnalysisStartConditionSatisfied;
 
-        @Schema(description = "분석 진행 상태", example = "false")
+        // TODO: 추후 분석 진행상태로 변경 예정
+        @Schema(description = "분석 시작 여부", example = "false")
         @JsonProperty("isAnalysisStarted")
         private Boolean isAnalysisStarted;
     }
