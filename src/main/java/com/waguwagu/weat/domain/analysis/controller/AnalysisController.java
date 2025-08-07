@@ -108,14 +108,32 @@ public class AnalysisController {
         return ResponseDTO.of(analysisService.isMemberSubmitAnalysisSetting(memberId));
     }
 
-
-    @Operation(summary = "분석 시작가능조건 충족 여부 조회", description = "분석을 시작할 수 있는 조건을 만족했는지 여부를 조회합니다.")
+    @Operation(summary = "분석 상태 조회", description =
+            "그룹별로 분석 시작 가능 여부, 분석 시작 여부 등 분석의 전반적인 상태를 조회한다.\n\n")
     @ApiResponse(
             responseCode = "200",
             description = "성공",
             content = @Content(
                     mediaType = "application/json",
                     schema = @Schema(implementation = IsAnalysisStartAvailableDtoResponseWrapper.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없을 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "해당하는 그룹 없음",
+                            summary = "존재하지 않는 그룹 식별자",
+                            value = """
+                {
+                  "code": "GROUP_NOT_FOUND",
+                  "message": "존재하지 않는 그룹입니다. (groupId: ?)",
+                  "data": null
+                }
+                """
+                    )
             )
     )
     @GetMapping("/status")
