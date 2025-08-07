@@ -10,7 +10,7 @@ public class CategoryNotFoundException extends BaseException {
     }
 
     public CategoryNotFoundException(Long categoryId) {
-        super(ErrorCode.CATEGORY_NOT_FOUND, ErrorCode.GROUP_NOT_FOUND.getMessage() + " (categoryId: " + categoryId + ")");
+        super(ErrorCode.CATEGORY_NOT_FOUND, ErrorCode.CATEGORY_NOT_FOUND.getMessage() + " (categoryId: " + categoryId + ")");
     }
     
 }
