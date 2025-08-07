@@ -50,14 +50,13 @@ public class AnalysisService {
     // 분석 시작가능조건 충족여부 및 분석상태 조회
     public IsAnalysisStartAvailableDTO.Response isAnalysisStartAvailable(String groupId) {
 
-        final int submittedCountCriteria = 2;
+        final int GROUP_CRITERIA = 2;
+        final int SINGLE_CRITERIA = 1;
 
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException(groupId));
 
-        Optional<Analysis> optionalAnalysis = analysisRepository.findByGroupGroupId(groupId);
-
-        boolean isAnalysisStarted = optionalAnalysis
+        boolean isAnalysisStarted = analysisRepository.findByGroupGroupId(groupId)
                 .map(analysis -> !analysis.getAnalysisStatus().equals(AnalysisStatus.NOT_STARTED))
                 .orElse(false);
 
@@ -67,10 +66,13 @@ public class AnalysisService {
                 .filter(member -> analysisSettingRepository.existsByMemberMemberId(member.getMemberId()))
                 .count();
 
+        int criteria = group.isSingleMemberGroup() ? SINGLE_CRITERIA : GROUP_CRITERIA;
+        boolean isSatisfied = submittedCount >= criteria;
+
         return IsAnalysisStartAvailableDTO.Response.builder()
                 .groupId(group.getGroupId())
                 .submittedCount(submittedCount)
-                .isAnalysisStartConditionSatisfied(submittedCount >= submittedCountCriteria)
+                .isAnalysisStartConditionSatisfied(isSatisfied)
                 .isAnalysisStarted(isAnalysisStarted)
                 .build();
     }
@@ -162,19 +164,21 @@ public class AnalysisService {
     public AnalysisStartDTO.Response analysisStart(AnalysisStartDTO.Request request) {
 
         var groupId = request.getGroupId();
+
+        // 그룹 조회
+        Group group = groupRepository.findById(groupId)
+                .orElseThrow(() -> new GroupNotFoundException(groupId));
+
+
         var analysisStartAvailable = isAnalysisStartAvailable(groupId);
 
         if (analysisStartAvailable.getIsAnalysisStarted()) {
             throw new AnalysisAlreadyStartedForGroupIdException(groupId);
         }
 
-        if (!request.getIsIndividualAnalysis() && !isAnalysisStartAvailable(groupId).getIsAnalysisStartConditionSatisfied()) {
+        if (!analysisStartAvailable.getIsAnalysisStartConditionSatisfied()) {
             throw new AnalysisConditionNotSatisfiedForGroupIdException(groupId);
         }
-
-        // 그룹 조회
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GroupNotFoundException(groupId));
 
         // 그룹에 대한 분석정보 조회
         Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId())
