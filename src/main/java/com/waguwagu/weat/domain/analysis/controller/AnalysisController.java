@@ -38,12 +38,12 @@ public class AnalysisController {
                             name = "이미 제출됨",
                             summary = "이미 제출한 회원입니다.",
                             value = """
-                {
-                  "code": "MEMBER_ALREADY_SUBMIT_SETTING",
-                  "message": "이미 제출한 회원입니다.",
-                  "data": null
-                }
-                """
+                                    {
+                                      "code": "MEMBER_ALREADY_SUBMIT_SETTING",
+                                      "message": "이미 제출한 회원입니다.",
+                                      "data": null
+                                    }
+                                    """
                     )
             )
     )
@@ -127,12 +127,12 @@ public class AnalysisController {
                             name = "해당하는 그룹 없음",
                             summary = "존재하지 않는 그룹 식별자",
                             value = """
-                {
-                  "code": "GROUP_NOT_FOUND",
-                  "message": "존재하지 않는 그룹입니다. (groupId: ?)",
-                  "data": null
-                }
-                """
+                                    {
+                                      "code": "GROUP_NOT_FOUND",
+                                      "message": "존재하지 않는 그룹입니다. (groupId: ?)",
+                                      "data": null
+                                    }
+                                    """
                     )
             )
     )
@@ -142,7 +142,72 @@ public class AnalysisController {
     }
 
     // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
-    @Operation(summary = "분석 시작 요청", description = "분석 시작 조건을 충족한 경우, 요청시점까지 제출된 분석설정을 활용하여 분석을 진행한다.")
+    @Operation(summary = "분석 시작 요청", description = "분석 시작 조건을 충족한 경우, 요청시점까지 제출된 분석설정을 활용하여 분석을 진행한다.\n" +
+            "- 단체로 참여하는 경우 `2명 이상이 분석 설정을 제출`해야만 분석을 시작할 수 있다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "분석 시작 요청 성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = AnalysisStartDTOResponseWrapper.class)
+            )
+    )
+    @ApiResponse(
+            responseCode = "208",
+            description = "이미 분석이 시작된 그룹일 경우",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "이미 시작됨",
+                            summary = "분석이 이미 시작된 그룹",
+                            value = """
+                                    {
+                                      "code": "ANALYSIS_ALREADY_STARTED",
+                                      "message": "이미 진행중인 분석입니다.",
+                                      "data": null
+                                    }
+                                    """
+                    )
+            )
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "분석 시작 조건 불충족",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = @ExampleObject(
+                            name = "분석 조건 불충족",
+                            summary = "제출된 설정이 부족함",
+                            value = """
+                                    {
+                                      "code": "ANALYSIS_CONDITION_NOT_SATISFIED",
+                                      "message": "분석 시작 조건이 충족되지 않았습니다.",
+                                      "data": null
+                                    }
+                                    """
+                    )
+            )
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "요청한 리소스를 찾을 수 없음",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "GROUP_NOT_FOUND",
+                                    summary = "존재하지 않는 그룹 ID",
+                                    value = """
+                                            {
+                                              "code": "GROUP_NOT_FOUND",
+                                              "message": "존재하지 않는 그룹입니다. (groupId: ?)",
+                                              "data": null
+                                            }
+                                            """
+                            )
+                    }
+            )
+    )
     @PostMapping
     public ResponseDTO<AnalysisStartDTO.Response> analysisStart(@RequestBody AnalysisStartDTO.Request request) {
         return ResponseDTO.of(analysisService.analysisStart(request.getGroupId()));
