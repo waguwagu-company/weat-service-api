@@ -2,22 +2,86 @@ package com.waguwagu.weat.domain.analysis.model.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import lombok.ToString;
+import lombok.Getter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class AIAnalysisDTO {
-
-    @Data
+    @Getter
     @Builder
     public static class Request {
-        // TODO: 임시 테스트 용 요청
+
         private String groupId;
+
+        @Builder.Default
+        private List<MemberSetting> memberSettingList = new ArrayList<>();
+
+        @Builder
+        @Getter
+        public static class MemberSetting {
+            // 사용자 식별자
+            private Long memberId;
+
+            // 위치 설정
+            private Double xPosition;
+            private Double yPosition;
+
+            // 카테고리 호/불호 설정
+            @Builder.Default
+            private List<MemberSetting.Category> categoryList = new ArrayList<>();
+
+            // 텍스트 입력 설정
+            private String inputText;
+
+            @Getter
+            @Builder
+            public static class Category {
+                private int categoryId;
+                private String categoryName;
+            }
+
+        }
     }
 
-    @Data
+    @Getter
     public static class Response {
-        // TODO: 임시 테스트 용 응답
-        private String groupId;
-        private String result;
+
+        private Long groupId;
+        private AnalysisResult analysisResult;
+
+        @Getter
+        public static class AnalysisResult {
+
+            List<AnalysisResultDetial> analysisResultDetailList = new ArrayList<>();
+
+            @Getter
+            public static class AnalysisResultDetial {
+
+                private Place place;
+                private List<AnalysisBasis> analysisBasisList;
+                private String analysisResultDetailContent;
+
+                @Getter
+                public static class Place {
+                    private String placeName;
+                    private String placeRoadNameAddress;
+                    private List<PlaceImage> placeImageList;
+                }
+
+                @Getter
+                public static class PlaceImage {
+                    private String placeImageUrl;
+                    private Byte[] placeImageData;
+                }
+
+                @Getter
+                public static class AnalysisBasis {
+                    private String analysisBasisType;
+                    private String analysisBasisContent;
+                }
+            }
+        }
     }
 }

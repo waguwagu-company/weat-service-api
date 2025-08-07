@@ -6,9 +6,7 @@ import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdExc
 import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
-import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
-import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingDetailRepository;
-import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingRepository;
+import com.waguwagu.weat.domain.analysis.repository.*;
 import com.waguwagu.weat.domain.category.exception.CategoryNotFoundException;
 import com.waguwagu.weat.domain.category.model.entity.Category;
 import com.waguwagu.weat.domain.category.repository.CategoryRepository;
@@ -19,8 +17,13 @@ import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,16 +37,27 @@ import java.util.concurrent.Executors;
 @RequiredArgsConstructor
 public class AnalysisService {
 
+    // TODO: 테스트용 - url은 yml에 추가
+    private final WebClient webClient = WebClient.builder()
+            .baseUrl("https://weat.kro.kr/ai") // 실제 AI 서버 주소
+            .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .build();
+
+
     private final Executor analysisServiceExcutor = Executors.newFixedThreadPool(10);
 
+    private final PlaceRepository placeRepository;
     private final AIServiceAdaptor aiServiceAdaptor;
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
     private final AnalysisRepository analysisRepository;
+    private final PlaceImageRepository placeImageRepository;
+    private final AnalysisBasisRepository analysisBasisRepository;
+    private final AnalysisResultRepository analysisResultRepository;
     private final AnalysisSettingRepository analysisSettingRepository;
+    private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
-
 
     // 분석 시작가능조건 충족여부 및 분석상태 조회
     public IsAnalysisStartAvailableDTO.Response isAnalysisStartAvailable(String groupId) {
@@ -154,6 +168,16 @@ public class AnalysisService {
     @Transactional
     public AnalysisStartDTO.Response analysisStart(String groupId) {
 
+        var analysisStartAvailable = isAnalysisStartAvailable(groupId);
+
+        if (analysisStartAvailable.getIsAnalysisStarted()) {
+            throw new RuntimeException("이미 시작된 분석입니다.");
+        }
+
+        if (!isAnalysisStartAvailable(groupId).getIsAnalysisStartConditionSatisfied()) {
+            throw new RuntimeException("분석 조건을 만족하지 않았습니다.");
+        }
+
         // 그룹 조회
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException(groupId));
@@ -185,6 +209,61 @@ public class AnalysisService {
                  *
                  */
 
+                // TODO: 분석 결과 생성
+                AnalysisResult analysisResult =
+                        analysisResultRepository.save(AnalysisResult.builder()
+                                .group(group)
+                                .analysis(analysis)
+                                .build());
+
+                var resultAnalysisDetailList = response.getAnalysisResult().getAnalysisResultDetailList();
+
+                for (var analysisDetail : resultAnalysisDetailList) {
+                    // TODO: 장소 테이블에 데이터 삽입
+                    var placeInfo = analysisDetail.getPlace();
+
+                    Place place = placeRepository.save(Place.builder()
+                            .placeName(placeInfo.getPlaceName())
+                            .placeRoadnameAddress(placeInfo.getPlaceRoadNameAddress())
+                            .build());
+
+                    // TODO: 장소이미지 테이블에 데이터 삽입
+                    var placeImageInfoList = placeInfo.getPlaceImageList();
+
+                    for (var placeImageInfo : placeImageInfoList) {
+                        PlaceImage placeImage = PlaceImage.builder()
+                                .place(place)
+                                .placeImageUrl(placeImageInfo.getPlaceImageUrl())
+                                .placeImageData(placeImageInfo.getPlaceImageData())
+                                .build();
+
+                        placeImageRepository.save(placeImage);
+                    }
+
+                    // TODO: 분석결과상세 테이블에 데이터 삽입
+                    var analysisResultDetailContent = analysisDetail.getAnalysisResultDetailContent();
+                    AnalysisResultDetail analysisResultDetail =
+                            analysisResultDetailRepository.save(AnalysisResultDetail.builder()
+                                    .analysisResult(analysisResult)
+                                    .analysisResultDetailContent(analysisResultDetailContent)
+                                    .place(place)
+                                    .build());
+
+                    // TODO: 분석근거 테이블에 데이터 삽입
+                    var analysisBasisInfoList = analysisDetail.getAnalysisBasisList();
+                    for (var analysisBasisInfo : analysisBasisInfoList) {
+                        AnalysisBasis analysisBasis =
+                                analysisBasisRepository.save(AnalysisBasis.builder()
+                                        .analysisResultDetail(analysisResultDetail)
+                                        .analysisBasisType(analysisBasisInfo.getAnalysisBasisType())
+                                        .analysisBasisContent(analysisBasisInfo.getAnalysisBasisContent())
+                                        .build());
+                    }
+
+                    // TODO: 분석 완료 처리
+                    analysis.setAnalysisStatus(AnalysisStatus.COMPLETED);
+
+                }
 
             } catch (Exception e) {
                 /**
@@ -192,17 +271,24 @@ public class AnalysisService {
                  * analysis.setAnalysisStatus(AnalysisStatus.FAILED);
                  * analysisRepository.save(analysis);
                  */
+                analysis.setAnalysisStatus(AnalysisStatus.FAILED);
             }
         }, analysisServiceExcutor);
 
         return AnalysisStartDTO.Response.builder()
                 .groupId(group.getGroupId())
                 .analysisId(analysis.getAnalysisId())
-                .analysisStatus(analysis.getAnalysisStatus().toString()).build();
+                .analysisStatus(analysis.getAnalysisStatus().toString())
+                .build();
     }
 
-    public String sendAiServiceApiRequest() {
-        return "";
+    public ValidationDTO.Response validateInput(ValidationDTO.Request request) {
+        // TODO: 테스트용 - 공통 메서드로 빼기
+        return webClient.post()
+                .uri("/validate")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(ValidationDTO.Response.class)
+                .block();
     }
-
 }

@@ -11,6 +11,7 @@ import org.hibernate.annotations.Comment;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@DiscriminatorValue("CATEGORY")
 @Table(name = "category_setting")
 @Comment("카테고리 설정")
 public class CategorySetting extends AnalysisSettingDetail {
