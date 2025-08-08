@@ -215,13 +215,16 @@ public class AnalysisService {
             // 카테고리 설정
             List<CategorySetting> categorySettingList = categorySettingRepository.findAllByMemberId(groupMember.getMemberId());
 
-            List<AIAnalysisDTO.Request.MemberSetting.Category> memberSettingCategoryList = new ArrayList<>();
+            List<AIAnalysisDTO.Request.MemberSetting.CategorySetting> memberSettingCategoryList = new ArrayList<>();
 
             for (CategorySetting categorySetting : categorySettingList) {
                 memberSettingCategoryList.add(
-                        AIAnalysisDTO.Request.MemberSetting.Category.builder()
+                        AIAnalysisDTO.Request.MemberSetting.CategorySetting.builder()
                                 .categoryId(categorySetting.getCategory().getCategoryId())
                                 .categoryName(categorySetting.getCategory().getCategoryName())
+                                .categoryTagId(categorySetting.getCategoryTag().getCategoryTagId())
+                                .categoryTagName(categorySetting.getCategoryTag().getCategoryTagName())
+                                .isPreffered(categorySetting.getIsPreferred())
                                 .build()
                 );
             }
