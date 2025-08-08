@@ -6,8 +6,11 @@ import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
 import com.waguwagu.weat.domain.category.exception.CategoryNotFoundException;
+import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
 import com.waguwagu.weat.domain.category.model.entity.Category;
+import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
 import com.waguwagu.weat.domain.category.repository.CategoryRepository;
+import com.waguwagu.weat.domain.category.repository.CategoryTagRepository;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
@@ -46,6 +49,7 @@ public class AnalysisService {
     private final TextInputSettingRepository textInputSettingRepository;
     private final LocationSettingRepository locationSettingRepository;
     private final CategorySettingRepository categorySettingRepository;
+    private final CategoryTagRepository categoryTagRepository;
 
     // 분석 시작가능조건 충족여부 및 분석상태 조회
     public IsAnalysisStartAvailableDTO.Response isAnalysisStartAvailable(String groupId) {
@@ -136,9 +140,13 @@ public class AnalysisService {
             Category category = categoryRepository.findById(categorySettingDTO.getCategoryId())
                     .orElseThrow(() -> new CategoryNotFoundException(categorySettingDTO.getCategoryId()));
 
+            CategoryTag categoryTag = categoryTagRepository.findById(categorySettingDTO.getCategoryTagId())
+                    .orElseThrow(() -> new CategoryTagNotFoundException(categorySettingDTO.getCategoryTagId()));
+
             CategorySetting categorySetting = CategorySetting.builder()
                     .analysisSetting(analysisSetting)
                     .category(category)
+                    .categoryTag(categoryTag)
                     .isPreferred(categorySettingDTO.getIsPreferred())
                     .build();
 
@@ -226,7 +234,7 @@ public class AnalysisService {
                             .memberId(groupMember.getMemberId())
                             .xPosition(locationSetting.getXPosition())
                             .yPosition(locationSetting.getYPosition())
-                            .categoryList(memberSettingCategoryList) // TODO
+                            .categoryList(memberSettingCategoryList)
                             .inputText(textInputSetting.getInputText())
                             .build();
 
