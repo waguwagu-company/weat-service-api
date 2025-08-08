@@ -23,4 +23,8 @@ public class Category {
     @Comment("카테고리 명")
     @Column(name = "category_name", columnDefinition = "VARCHAR(50)", length = 50)
     private String categoryName;
+
+    @Column(name = "category_order")
+    @Comment("카테고리순서")
+    private Integer categoryOrder;
 }
