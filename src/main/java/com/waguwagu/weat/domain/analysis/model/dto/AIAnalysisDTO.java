@@ -33,16 +33,21 @@ public class AIAnalysisDTO {
 
             // 카테고리 호/불호 설정
             @Builder.Default
-            private List<MemberSetting.Category> categoryList = new ArrayList<>();
+            private List<MemberSetting.CategorySetting> categoryList = new ArrayList<>();
 
             // 텍스트 입력 설정
             private String inputText;
 
             @Data
             @Builder
-            public static class Category {
+            public static class CategorySetting {
                 private Long categoryId;
                 private String categoryName;
+
+                private Long categoryTagId;
+                private String categoryTagName;
+
+                private boolean isPreffered;
             }
 
         }
