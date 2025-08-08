@@ -224,7 +224,26 @@ public class AnalysisController {
                     schema = @Schema(implementation = ValidationDTOResponseWrapper.class)
             )
     )
-    // TODO: 예외 케이스... 생각...
+    @ApiResponse(
+            responseCode = "500",
+            description = "AI 서버 응답 오류",
+            content = @Content(
+                    mediaType = "application/json",
+                    examples = {
+                            @ExampleObject(
+                                    name = "AI_SERVER_ERROR",
+                                    summary = "AI 서버 호출 중 오류 발셍",
+                                    value = """
+                                            {
+                                              "code": "AI_SERVER_ERROR",
+                                              "message": "AI 서버 호출 중 오류가 발생했습니다.",
+                                              "data": null
+                                            }
+                                            """
+                            )
+                    }
+            )
+    )
     public ResponseDTO<ValidationDTO.Response> validateInput(@RequestBody ValidationDTO.Request request) {
         return ResponseDTO.of(analysisService.validateInput(request));
     }

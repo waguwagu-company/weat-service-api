@@ -1,23 +1,26 @@
 package com.waguwagu.weat.domain.analysis.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Getter
+@Schema(description = "사용자 입력 유효성 검사")
 public class ValidationDTO {
 
     @Getter
     public static class Request {
-        private String input;
+        @Schema(description = "사용자 입력값")
+        private String userInput;
     }
 
     @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class Response {
-        private boolean isValid;
-        private String AIMessage;
+        @JsonProperty("isValid")
+        @Schema(description = "유효 여부")
+        private Boolean isValid;
+
+        @Schema(description = "AI 메세지")
+        private String message;
     }
 }
