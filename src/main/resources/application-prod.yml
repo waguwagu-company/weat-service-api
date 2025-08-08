@@ -6,4 +6,4 @@ ai:
     base-url: https://weat.kro.kr/ai
     uri:
       validation: /api/validate
-      analysis: /api/analyze
+      analysis: /api/analysis
