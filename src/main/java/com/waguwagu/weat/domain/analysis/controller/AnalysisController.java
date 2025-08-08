@@ -109,7 +109,12 @@ public class AnalysisController {
     }
 
     @Operation(summary = "분석 상태 조회", description =
-            "그룹별로 분석 시작 가능 여부, 분석 시작 여부 등 분석의 전반적인 상태를 조회한다.\n\n")
+            "그룹별로 분석 시작 가능 여부, 분석 진행 상태 등 분석의 전반적인 상태를 조회한다.\n\n" +
+                    "진행 상태(`analysisStatus`)\n" +
+                    "   - NOT_STARTED : 분석이 시작되지 않음" +
+                    "   - IN_PROGRESS : 분석 진행중" +
+                    "   - COMPLETED : 분석 완료" +
+                    "   - FAILED : 분석 실패")
     @ApiResponse(
             responseCode = "200",
             description = "성공",
@@ -137,8 +142,8 @@ public class AnalysisController {
             )
     )
     @GetMapping("/status")
-    public ResponseDTO<IsAnalysisStartAvailableDTO.Response> isAnalysisStartAvailable(@RequestParam("groupId") String groupId) {
-        return ResponseDTO.of(analysisService.isAnalysisStartAvailable(groupId));
+    public ResponseDTO<GetAnalysisStatusDTO.Response> getAnalysisStatus(@RequestParam("groupId") String groupId) {
+        return ResponseDTO.of(analysisService.getAnalysisStatus(groupId));
     }
 
     // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
