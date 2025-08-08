@@ -224,7 +224,7 @@ public class AnalysisService {
                                 .categoryName(categorySetting.getCategory().getCategoryName())
                                 .categoryTagId(categorySetting.getCategoryTag().getCategoryTagId())
                                 .categoryTagName(categorySetting.getCategoryTag().getCategoryTagName())
-                                .isPreffered(categorySetting.getIsPreferred())
+                                .isPreferred(categorySetting.getIsPreferred())
                                 .build()
                 );
             }

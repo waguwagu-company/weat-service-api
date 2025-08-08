@@ -46,8 +46,8 @@ public class AIAnalysisDTO {
 
                 private Long categoryTagId;
                 private String categoryTagName;
-
-                private boolean isPreffered;
+                @JsonProperty("isPreferred")
+                private boolean isPreferred;
             }
 
         }
