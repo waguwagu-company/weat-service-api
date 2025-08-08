@@ -1,6 +1,7 @@
 package com.waguwagu.weat.domain.analysis.model.entity;
 
 import com.waguwagu.weat.domain.category.model.entity.Category;
+import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -20,6 +21,11 @@ public class CategorySetting extends AnalysisSettingDetail {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false, columnDefinition = "INTEGER")
     private Category category;
+
+    @Comment("카테고리태그")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_tag_id")
+    private CategoryTag categoryTag;
 
     @Comment("호불호 여부")
     @Column(name = "is_preferred", columnDefinition = "BOOLEAN")
