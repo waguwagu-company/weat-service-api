@@ -23,8 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -32,18 +30,12 @@ import java.util.concurrent.Executors;
 @RequiredArgsConstructor
 public class AnalysisService {
 
-    private final PlaceRepository placeRepository;
     private final AIServiceAdaptor aiServiceAdaptor;
-
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
     private final CategoryRepository categoryRepository;
     private final AnalysisRepository analysisRepository;
-    private final PlaceImageRepository placeImageRepository;
-    private final AnalysisBasisRepository analysisBasisRepository;
-    private final AnalysisResultRepository analysisResultRepository;
     private final AnalysisSettingRepository analysisSettingRepository;
-    private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
     private final AnalysisAsyncExecutor analysisAsyncExecutor;
     private final TextInputSettingRepository textInputSettingRepository;
@@ -52,7 +44,7 @@ public class AnalysisService {
     private final CategoryTagRepository categoryTagRepository;
 
     // 분석 시작가능조건 충족여부 및 분석상태 조회
-    public IsAnalysisStartAvailableDTO.Response isAnalysisStartAvailable(String groupId) {
+    public GetAnalysisStatusDTO.Response getAnalysisStatus(String groupId) {
 
         final int GROUP_CRITERIA = 2;
         final int SINGLE_CRITERIA = 1;
@@ -60,9 +52,9 @@ public class AnalysisService {
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException(groupId));
 
-        boolean isAnalysisStarted = analysisRepository.findByGroupGroupId(groupId)
-                .map(analysis -> !analysis.getAnalysisStatus().equals(AnalysisStatus.NOT_STARTED))
-                .orElse(false);
+        String analysisStatus = analysisRepository.findByGroupGroupId(groupId)
+                .map(analysis -> analysis.getAnalysisStatus().toString())
+                .orElse(AnalysisStatus.NOT_STARTED.toString());
 
         List<Member> memberList = memberRepository.findAllByGroupGroupId(groupId);
 
@@ -73,11 +65,12 @@ public class AnalysisService {
         int criteria = group.isSingleMemberGroup() ? SINGLE_CRITERIA : GROUP_CRITERIA;
         boolean isSatisfied = submittedCount >= criteria;
 
-        return IsAnalysisStartAvailableDTO.Response.builder()
+        return GetAnalysisStatusDTO.Response.builder()
                 .groupId(group.getGroupId())
+                .isSingleMemberGroup(group.isSingleMemberGroup())
                 .submittedCount(submittedCount)
                 .isAnalysisStartConditionSatisfied(isSatisfied)
-                .isAnalysisStarted(isAnalysisStarted)
+                .analysisStatus(analysisStatus)
                 .build();
     }
 
@@ -178,9 +171,9 @@ public class AnalysisService {
                 .orElseThrow(() -> new GroupNotFoundException(groupId));
 
 
-        var analysisStartAvailable = isAnalysisStartAvailable(groupId);
+        var analysisStartAvailable = getAnalysisStatus(groupId);
 
-        if (analysisStartAvailable.getIsAnalysisStarted()) {
+        if (!analysisStartAvailable.getAnalysisStatus().equals(AnalysisStatus.NOT_STARTED.toString())) {
             throw new AnalysisAlreadyStartedForGroupIdException(groupId);
         }
 

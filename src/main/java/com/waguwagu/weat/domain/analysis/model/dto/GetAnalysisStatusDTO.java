@@ -6,8 +6,8 @@ import lombok.*;
 
 @Getter
 @Setter
-@Schema(description = "분석 가능 여부")
-public class IsAnalysisStartAvailableDTO {
+@Schema(description = "분석 상태 조회")
+public class GetAnalysisStatusDTO {
 
     @Getter
     @Setter
@@ -16,16 +16,19 @@ public class IsAnalysisStartAvailableDTO {
         @Schema(description = "대상 그룹 식별자", example = "f5d8931a830e41968663ce0dc12bf9b2")
         private String groupId;
 
+        @Schema(description = "1인 그룹 여부", example = "false")
+        @JsonProperty("isSingleMemberGroup")
+        private Boolean isSingleMemberGroup;
+
         @Schema(description = "그룹 내 설정을 제출한 멤버 수", example = "2")
         private int submittedCount;
 
-        @Schema(description = "분석 시작 가능 여부", example = "true")
+        @Schema(description = "분석시작조건 충족 여부", example = "true")
         @JsonProperty("isAnalysisStartConditionSatisfied")
         private Boolean isAnalysisStartConditionSatisfied;
 
-        // TODO: 추후 분석 진행상태로 변경 예정
-        @Schema(description = "분석 시작 여부", example = "false")
-        @JsonProperty("isAnalysisStarted")
-        private Boolean isAnalysisStarted;
+        @Schema(description = "분석 진행 상태", example = "NOT_STARTED")
+        @JsonProperty("analysisStatus")
+        private String analysisStatus;
     }
 }
