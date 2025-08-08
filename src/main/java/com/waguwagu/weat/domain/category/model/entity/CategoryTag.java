@@ -16,7 +16,7 @@ public class CategoryTag {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "category_tag_id")
     @Comment("카테고리 식별자")
-    private Integer categoryTagId;
+    private Long categoryTagId;
 
     @Column(name = "category_tag_name", length = 50)
     @Comment("카테고리 태그명")
@@ -24,7 +24,7 @@ public class CategoryTag {
 
     @Column(name = "category_tag_order")
     @Comment("카테고리 태그순서")
-    private Integer categoryTagOrder;
+    private Long categoryTagOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "category_tag_category_fk"))

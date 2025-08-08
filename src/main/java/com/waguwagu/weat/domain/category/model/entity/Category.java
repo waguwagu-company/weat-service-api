@@ -26,5 +26,5 @@ public class Category {
 
     @Column(name = "category_order")
     @Comment("카테고리순서")
-    private Integer categoryOrder;
+    private Long categoryOrder;
 }
