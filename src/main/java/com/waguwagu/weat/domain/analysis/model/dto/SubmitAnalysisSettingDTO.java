@@ -56,6 +56,9 @@ public class SubmitAnalysisSettingDTO {
             @Schema(description = "카테고리 식별자", example = "1")
             private Long categoryId;
 
+            @Schema(description = "카테고리태그 식별자", example = "1")
+            private Long categoryTagId;
+
             @Schema(description = "호/불호 여부", example = "true")
             private Boolean isPreferred;
         }
