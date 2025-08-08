@@ -57,6 +57,7 @@ public class AIServiceAdaptor {
     }
 
     public ValidationDTO.Response requestValidation(ValidationDTO.Request payload) {
+
         return aiWebClient.post()
                 .uri(validationUri)
                 .bodyValue(payload)
