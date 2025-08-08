@@ -39,7 +39,7 @@ public class AIServiceAdaptor {
         headers.setContentType(MediaType.APPLICATION_JSON);
 
         HttpEntity<AIAnalysisDTO.Request > request = new HttpEntity<>(payload, headers);
-
+        log.info("payload => {}", payload);
         try {
             ResponseEntity<AIAnalysisDTO.Response> response = aiRestTemplate.exchange(
                     url,
