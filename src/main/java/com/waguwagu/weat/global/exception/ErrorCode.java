@@ -15,7 +15,8 @@ public enum ErrorCode {
     MEMBER_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "GROUP_MEMBER_LIMIT", "그룹 정원을 초과했습니다."),
     MEMBER_ALREADY_SUBMIT_SETTING(HttpStatus.ALREADY_REPORTED, "MEMBER_ALREADY_SUBMIT_SETTING", "이미 제출한 회원입니다."),
     ANALYSIS_CONDITION_NOT_SATISFIED(HttpStatus.BAD_REQUEST, "ANALYSIS_CONDITION_NOT_SATISFIED","분석 시작 조건이 충족되지 않았습니다." ),
-    ANALYSIS_ALREADY_STARTED(HttpStatus.ALREADY_REPORTED, "ANALYSIS_ALREADY_STARTED", "이미 진행중인 분석입니다.");
+    ANALYSIS_ALREADY_STARTED(HttpStatus.ALREADY_REPORTED, "ANALYSIS_ALREADY_STARTED", "이미 진행중인 분석입니다."),
+    AI_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "AI_SERVER_ERROR", "AI 서버 호출 중 오류가 발생했습니다.");
 
     private final String code;
     private final HttpStatus status;

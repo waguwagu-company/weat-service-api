@@ -1,8 +1,10 @@
 package com.waguwagu.weat.domain.analysis.adaptor;
 
+import com.waguwagu.weat.domain.analysis.exception.AIServerException;
 import com.waguwagu.weat.domain.analysis.model.dto.AIAnalysisDTO;
 
 import com.waguwagu.weat.domain.analysis.model.dto.ValidationDTO;
+import com.waguwagu.weat.domain.common.dto.AIErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +12,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 @Component
 @RequiredArgsConstructor
@@ -58,6 +61,11 @@ public class AIServiceAdaptor {
                 .uri(validationUri)
                 .bodyValue(payload)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(AIErrorResponse.class).flatMap(error -> {
+                            log.error("AI 오류 - code: {}, message: {}", error.getCode(), error.getMessage());
+                            return Mono.error(new AIServerException(error.getMessage()));
+                        }))
                 .bodyToMono(ValidationDTO.Response.class)
                 .block();
     }
