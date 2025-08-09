@@ -305,4 +305,22 @@ public class AnalysisService {
         Long count = analysisResultLikeRepository.countByAnalysisResultDetail(analysisResultDetail);
 
         return GetAnalysisResultLikeCountDTO.Response.builder()
+                .analysisResultDetailId(analysisResultDetailId)
+                .likeCount(count)
+                .build();
+    }
+
+
+    /**
+     * 멤버가 특정 분석결과상세에 좋아요를 눌렀는지 상태 조회
+     */
+    public GetAnalysisResultLikeStatusByDetailDTO.Response getAnalysisResultLikeStatusByDetail(Long analysisResultDetailId, Long memberId) {
+        return GetAnalysisResultLikeStatusByDetailDTO.Response.builder()
+                .analysisResultDetailId(analysisResultDetailId)
+                .memberId(memberId)
+                .isLiked(analysisResultLikeRepository.findByAnalysisResultDetailIdAndMemberId(analysisResultDetailId, memberId).isPresent())
+                .build();
+    }
+
+
 }
