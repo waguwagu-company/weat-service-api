@@ -30,7 +30,7 @@ public class GroupService {
     @Transactional
     public CreateGroupDTO.Response createGroup(CreateGroupDTO.Request request) {
         Group group = Group.builder()
-                .isSingleMemberGroup(request.isSingleMemberGroup())
+                .isSingleMemberGroup(request.getIsSingleMemberGroup())
                 .build();
         groupRepository.save(group);
 

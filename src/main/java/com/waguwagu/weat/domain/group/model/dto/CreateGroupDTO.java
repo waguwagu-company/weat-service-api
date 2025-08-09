@@ -14,7 +14,7 @@ public class CreateGroupDTO {
     public static class Request {
         @JsonProperty("isSingleMemberGroup")
         @Schema(description = "1인 그룹 여부")
-        private boolean isSingleMemberGroup;
+        private Boolean isSingleMemberGroup;
     }
 
     @Builder
