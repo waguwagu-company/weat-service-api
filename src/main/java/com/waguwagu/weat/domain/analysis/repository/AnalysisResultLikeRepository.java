@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.analysis.repository;
 
+import com.waguwagu.weat.domain.analysis.model.entity.AnalysisResultDetail;
 import com.waguwagu.weat.domain.analysis.model.entity.AnalysisResultLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,8 @@ public interface AnalysisResultLikeRepository extends JpaRepository<AnalysisResu
             @Param("analysisResultDetailId") Long analysisResultDetailId,
             @Param("memberId") Long memberId
     );
+
+
+    Long countByAnalysisResultDetail(AnalysisResultDetail detail);
+
 }

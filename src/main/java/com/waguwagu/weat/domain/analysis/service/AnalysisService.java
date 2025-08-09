@@ -27,7 +27,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class AnalysisService {
 
@@ -92,7 +92,6 @@ public class AnalysisService {
                 .build();
     }
 
-    @Transactional
     // 멤버별 분석 설정 제출
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
         // 회원 정보 조회
@@ -164,7 +163,6 @@ public class AnalysisService {
     }
 
     // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
-    @Transactional
     public AnalysisStartDTO.Response analysisStart(AnalysisStartDTO.Request request) {
 
         var groupId = request.getGroupId();
@@ -260,7 +258,11 @@ public class AnalysisService {
 
 
     // 분석결과상세(장소)별 좋아요 토글 기능
-    public void toggleAnalysisResultDetailLike(Long analysisResultDetailId, Long memberId){
+    public ToggleAnalysisResultDetailLikeDTO.Response toggleAnalysisResultDetailLike(ToggleAnalysisResultDetailLikeDTO.Request request) {
+
+        Long memberId = request.getMemberId();
+        Long analysisResultDetailId = request.getAnalysisResultDetailId();
+
         Member member = memberRepository.getReferenceById(memberId);
 
         Optional<AnalysisResultLike> likeOpt =
@@ -268,7 +270,11 @@ public class AnalysisService {
 
         if (likeOpt.isPresent()) {
             analysisResultLikeRepository.delete(likeOpt.get());
-            return;
+            return ToggleAnalysisResultDetailLikeDTO.Response.builder()
+                    .analysisResultDetailId(analysisResultDetailId)
+                    .memberId(memberId)
+                    .isLiked(false)
+                    .build();
         }
 
         AnalysisResultDetail detail = analysisResultDetailRepository.getReferenceById(analysisResultDetailId);
@@ -279,6 +285,12 @@ public class AnalysisService {
                 .build();
 
         analysisResultLikeRepository.save(like);
+
+        return ToggleAnalysisResultDetailLikeDTO.Response.builder()
+                .analysisResultDetailId(analysisResultDetailId)
+                .memberId(memberId)
+                .isLiked(true)
+                .build();
     }
 
 }
