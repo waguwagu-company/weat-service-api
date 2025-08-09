@@ -23,10 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
-@Transactional(readOnly = true)
+@Transactional
 @RequiredArgsConstructor
 public class AnalysisService {
 
@@ -42,6 +43,8 @@ public class AnalysisService {
     private final LocationSettingRepository locationSettingRepository;
     private final CategorySettingRepository categorySettingRepository;
     private final CategoryTagRepository categoryTagRepository;
+    private final AnalysisResultLikeRepository analysisResultLikeRepository;
+    private final AnalysisResultDetailRepository analysisResultDetailRepository;
 
     // 분석 시작가능조건 충족여부 및 분석상태 조회
     public GetAnalysisStatusDTO.Response getAnalysisStatus(String groupId) {
@@ -89,7 +92,6 @@ public class AnalysisService {
                 .build();
     }
 
-    @Transactional
     // 멤버별 분석 설정 제출
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
         // 회원 정보 조회
@@ -161,7 +163,6 @@ public class AnalysisService {
     }
 
     // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
-    @Transactional
     public AnalysisStartDTO.Response analysisStart(AnalysisStartDTO.Request request) {
 
         var groupId = request.getGroupId();
@@ -254,4 +255,74 @@ public class AnalysisService {
     public ValidationDTO.Response validateInput(ValidationDTO.Request request) {
         return aiServiceAdaptor.requestValidation(request);
     }
+
+
+    // 분석결과상세(장소)별 좋아요 토글 기능
+    public ToggleAnalysisResultDetailLikeDTO.Response toggleAnalysisResultDetailLike(ToggleAnalysisResultDetailLikeDTO.Request request) {
+
+        Long memberId = request.getMemberId();
+        Long analysisResultDetailId = request.getAnalysisResultDetailId();
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException(memberId));
+
+        Optional<AnalysisResultLike> likeOpt =
+                analysisResultLikeRepository.findByAnalysisResultDetailIdAndMemberId(analysisResultDetailId, memberId);
+
+        if (likeOpt.isPresent()) {
+            analysisResultLikeRepository.delete(likeOpt.get());
+            return ToggleAnalysisResultDetailLikeDTO.Response.builder()
+                    .analysisResultDetailId(analysisResultDetailId)
+                    .memberId(memberId)
+                    .isLiked(false)
+                    .build();
+        }
+
+        AnalysisResultDetail detail = analysisResultDetailRepository.getReferenceById(analysisResultDetailId);
+
+        AnalysisResultLike like = AnalysisResultLike.builder()
+                .analysisResultDetail(detail)
+                .member(member)
+                .build();
+
+        analysisResultLikeRepository.save(like);
+
+        return ToggleAnalysisResultDetailLikeDTO.Response.builder()
+                .analysisResultDetailId(analysisResultDetailId)
+                .memberId(memberId)
+                .isLiked(true)
+                .build();
+    }
+
+    /**
+     * 분석결과상세별 좋아요 개수 조회
+     */
+    public GetAnalysisResultLikeCountDTO.Response getAnalysisResultLikeCount(Long analysisResultDetailId) {
+
+        AnalysisResultDetail analysisResultDetail =
+                analysisResultDetailRepository.findById(analysisResultDetailId)
+                        .orElseThrow(() -> new AnalysisResultDetailNotFoundException(analysisResultDetailId));
+
+        Long count = analysisResultLikeRepository.countByAnalysisResultDetail(analysisResultDetail);
+
+        return GetAnalysisResultLikeCountDTO.Response.builder()
+                .analysisResultDetailId(analysisResultDetailId)
+                .likeCount(count)
+                .build();
+    }
+
+
+    /**
+     * 멤버가 특정 분석결과상세에 좋아요를 눌렀는지 상태 조회
+     */
+    public GetAnalysisResultLikeStatusByDetailDTO.Response getAnalysisResultLikeStatusByDetail(Long analysisResultDetailId, Long memberId) {
+
+        return GetAnalysisResultLikeStatusByDetailDTO.Response.builder()
+                .analysisResultDetailId(analysisResultDetailId)
+                .memberId(memberId)
+                .isLiked(analysisResultLikeRepository.findByAnalysisResultDetailIdAndMemberId(analysisResultDetailId, memberId).isPresent())
+                .build();
+    }
+
+
 }

@@ -252,4 +252,54 @@ public class AnalysisController {
     public ResponseDTO<ValidationDTO.Response> validateInput(@RequestBody ValidationDTO.Request request) {
         return ResponseDTO.of(analysisService.validateInput(request));
     }
+
+    @Operation(summary = "분석결과상세(장소)별 좋아요 토글", description = "분석결과의 각 장소에 대해 좋아요를 활성화 또는 비활성화한다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ToggleAnalysisResultDetailLikeResponseWrapper.class)
+            )
+    )
+    @PostMapping("/likes")
+    public ResponseDTO<ToggleAnalysisResultDetailLikeDTO.Response> toggleAnalysisDetail(@RequestBody ToggleAnalysisResultDetailLikeDTO.Request request) {
+        return ResponseDTO.of(analysisService.toggleAnalysisResultDetailLike(request));
+    }
+
+    @Operation(summary = "분석결과상세(장소)별 좋아요 개수 조회", description = "분석결과의 각 장소에 대한 좋아요 개수를 조회한다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ToggleAnalysisResultDetailLikeResponseWrapper.class)
+            )
+    )
+    @GetMapping("/likes")
+    public ResponseDTO<GetAnalysisResultLikeCountDTO.Response> getAnalysisDetailLikeCount(@RequestParam("analysisDetailId") Long analysisDetailId) {
+        return ResponseDTO.of(analysisService.getAnalysisResultLikeCount(analysisDetailId));
+    }
+
+
+    @Operation(
+            summary = "멤버의 특정 분석결과상세(장소) 좋아요 여부 확인",
+            description = "해당 멤버가 지정한 분석결과상세(장소)에 좋아요를 눌렀는지 여부를 확인한다."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = GetAnalysisResultLikeStatusByDetailResponseWrapper.class)
+            )
+    )
+    @GetMapping("/likes/status")
+    public ResponseDTO<GetAnalysisResultLikeStatusByDetailDTO.Response> getAnalysisResultLikeStatusByDetail(
+            @RequestParam("analysisResultDetailId") Long analysisDetailId,
+            @RequestParam("memberId") Long memberId) {
+        return ResponseDTO.of(analysisService.getAnalysisResultLikeStatusByDetail(analysisDetailId, memberId));
+    }
+
+
 }

@@ -12,6 +12,9 @@ import java.util.List;
 @Schema(name = "그룹별 분석 상세 DTO", description = "그룹별 분석 상세 DTO")
 public class GroupResultDetailDTO {
 
+    @Schema(description = "분셕결과상세 식별자")
+    private Long analysisResultDetailId;
+
     @Schema(description = "장소 식별자")
     private Long placeId;
 
