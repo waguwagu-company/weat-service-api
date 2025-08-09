@@ -32,7 +32,7 @@ public class CategoryController {
                     schema = @Schema(implementation = GetAllCategoryListDTO.Response.class)
             )
     )
-    @GetMapping("/")
+    @GetMapping
     public GetAllCategoryListDTO.Response getAllCategoryList() {
         return categoryService.getAllCategoryList();
     }
