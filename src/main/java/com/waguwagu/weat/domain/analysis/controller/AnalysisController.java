@@ -252,4 +252,18 @@ public class AnalysisController {
     public ResponseDTO<ValidationDTO.Response> validateInput(@RequestBody ValidationDTO.Request request) {
         return ResponseDTO.of(analysisService.validateInput(request));
     }
+
+    @Operation(summary = "분석결과상세(장소)별 좋아요 토글", description = "분석결과의 각 장소에 대해 좋아요를 활성화 또는 비활성화한다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ToggleAnalysisResultDetailLikeResponseWrapper.class)
+            )
+    )
+    @PostMapping("/likes")
+    public ResponseDTO<ToggleAnalysisResultDetailLikeDTO.Response> toggleAnalysisDetail(@RequestBody ToggleAnalysisResultDetailLikeDTO.Request request){
+        return ResponseDTO.of(analysisService.toggleAnalysisResultDetailLike(request));
+    }
 }
