@@ -293,4 +293,16 @@ public class AnalysisService {
                 .build();
     }
 
+    /**
+     * 분석결과상세별 좋아요 개수 조회
+     */
+    public GetAnalysisResultLikeCountDTO.Response getAnalysisResultLikeCount(Long analysisResultDetailId) {
+
+        AnalysisResultDetail analysisResultDetail =
+                analysisResultDetailRepository.findById(analysisResultDetailId)
+                        .orElseThrow(() -> new AnalysisResultDetailNotFoundException(analysisResultDetailId));
+
+        Long count = analysisResultLikeRepository.countByAnalysisResultDetail(analysisResultDetail);
+
+        return GetAnalysisResultLikeCountDTO.Response.builder()
 }

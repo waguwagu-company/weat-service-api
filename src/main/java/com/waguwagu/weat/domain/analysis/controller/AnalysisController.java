@@ -263,7 +263,21 @@ public class AnalysisController {
             )
     )
     @PostMapping("/likes")
-    public ResponseDTO<ToggleAnalysisResultDetailLikeDTO.Response> toggleAnalysisDetail(@RequestBody ToggleAnalysisResultDetailLikeDTO.Request request){
+    public ResponseDTO<ToggleAnalysisResultDetailLikeDTO.Response> toggleAnalysisDetail(@RequestBody ToggleAnalysisResultDetailLikeDTO.Request request) {
         return ResponseDTO.of(analysisService.toggleAnalysisResultDetailLike(request));
+    }
+
+    @Operation(summary = "분석결과상세(장소)별 좋아요 개수 조회", description = "분석결과의 각 장소에 대한 좋아요 개수를 조회한다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = ToggleAnalysisResultDetailLikeResponseWrapper.class)
+            )
+    )
+    @GetMapping("/likes")
+    public ResponseDTO<GetAnalysisResultLikeCountDTO.Response> getAnalysisDetailLikeCount(@RequestParam("analysisDetailId") Long analysisDetailId) {
+        return ResponseDTO.of(analysisService.getAnalysisResultLikeCount(analysisDetailId));
     }
 }
