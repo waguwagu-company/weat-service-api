@@ -273,7 +273,7 @@ public class AnalysisController {
             description = "성공",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = ToggleAnalysisResultDetailLikeResponseWrapper.class)
+                    schema = @Schema(implementation = GetAnalysisResultLikeCountResponseWrapper.class)
             )
     )
     @GetMapping("/likes")
