@@ -29,7 +29,7 @@ public class GroupController {
                     schema = @Schema(implementation = CreateGroupDtoResponseWrapper.class)
             )
     )
-    @PostMapping("/")
+    @PostMapping
     public ResponseDTO<CreateGroupDTO.Response> createGroup(@RequestBody CreateGroupDTO.Request request) {
         return ResponseDTO.of(groupService.createGroup(request));
     }
