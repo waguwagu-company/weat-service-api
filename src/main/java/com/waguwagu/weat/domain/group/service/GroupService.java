@@ -94,6 +94,7 @@ public class GroupService {
                     List<PlaceImageDTO> placeImageList = imageMap.getOrDefault(first.getPlaceId(), Collections.emptyList());
 
                     return GroupResultDetailDTO.builder()
+                            .analysisResultDetailId(first.getAnalysisResultDetailId())
                             .placeId(first.getPlaceId())
                             .placeName(first.getPlaceName())
                             .placeAddress(first.getPlaceRoadnameAddress())

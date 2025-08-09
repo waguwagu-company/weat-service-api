@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public class GroupAnalysisBasisQueryDTO {
+    private Long analysisResultDetailId;
     private Long placeId;
     private String placeName;
     private String placeRoadnameAddress;

@@ -7,6 +7,7 @@
 
     <select id="selectGroupAnalysisBasis" resultType="com.waguwagu.weat.domain.group.model.dto.GroupAnalysisBasisQueryDTO">
         SELECT
+            ard.analysis_result_detail         AS analysisResultDetail
             ard.analysis_result_detail_content AS analysisResultDetailContent,
             ab.analysis_basis_type             AS analysisBasisType,
             ab.analysis_basis_content          AS analysisBasisContent,
