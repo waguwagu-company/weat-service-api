@@ -23,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -42,6 +43,8 @@ public class AnalysisService {
     private final LocationSettingRepository locationSettingRepository;
     private final CategorySettingRepository categorySettingRepository;
     private final CategoryTagRepository categoryTagRepository;
+    private final AnalysisResultLikeRepository analysisResultLikeRepository;
+    private final AnalysisResultDetailRepository analysisResultDetailRepository;
 
     // 분석 시작가능조건 충족여부 및 분석상태 조회
     public GetAnalysisStatusDTO.Response getAnalysisStatus(String groupId) {
@@ -254,4 +257,28 @@ public class AnalysisService {
     public ValidationDTO.Response validateInput(ValidationDTO.Request request) {
         return aiServiceAdaptor.requestValidation(request);
     }
+
+
+    // 분석결과상세(장소)별 좋아요 토글 기능
+    public void toggleAnalysisResultDetailLike(Long analysisResultDetailId, Long memberId){
+        Member member = memberRepository.getReferenceById(memberId);
+
+        Optional<AnalysisResultLike> likeOpt =
+                analysisResultLikeRepository.findByAnalysisResultDetailIdAndMemberId(analysisResultDetailId, memberId);
+
+        if (likeOpt.isPresent()) {
+            analysisResultLikeRepository.delete(likeOpt.get());
+            return;
+        }
+
+        AnalysisResultDetail detail = analysisResultDetailRepository.getReferenceById(analysisResultDetailId);
+
+        AnalysisResultLike like = AnalysisResultLike.builder()
+                .analysisResultDetail(detail)
+                .member(member)
+                .build();
+
+        analysisResultLikeRepository.save(like);
+    }
+
 }
