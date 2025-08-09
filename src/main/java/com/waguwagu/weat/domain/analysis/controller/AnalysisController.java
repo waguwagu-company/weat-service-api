@@ -280,4 +280,26 @@ public class AnalysisController {
     public ResponseDTO<GetAnalysisResultLikeCountDTO.Response> getAnalysisDetailLikeCount(@RequestParam("analysisDetailId") Long analysisDetailId) {
         return ResponseDTO.of(analysisService.getAnalysisResultLikeCount(analysisDetailId));
     }
+
+
+    @Operation(
+            summary = "멤버의 특정 분석결과상세(장소) 좋아요 여부 확인",
+            description = "해당 멤버가 지정한 분석결과상세(장소)에 좋아요를 눌렀는지 여부를 확인한다."
+    )
+    @ApiResponse(
+            responseCode = "200",
+            description = "성공",
+            content = @Content(
+                    mediaType = "application/json",
+                    schema = @Schema(implementation = GetAnalysisResultLikeStatusByDetailResponseWrapper.class)
+            )
+    )
+    @GetMapping("/likes/status")
+    public ResponseDTO<GetAnalysisResultLikeStatusByDetailDTO.Response> getAnalysisResultLikeStatusByDetail(
+            @RequestParam("analysisResultDetailId") Long analysisDetailId,
+            @RequestParam("memberId") Long memberId) {
+        return ResponseDTO.of(analysisService.getAnalysisResultLikeStatusByDetail(analysisDetailId, memberId));
+    }
+
+
 }
