@@ -37,10 +37,12 @@ public class AdminService {
         List<GetGroupListDTO.Response.Group> resultGroupList = new ArrayList<>();
 
         for (Group group : groupList) {
-            // TODO: 생성된 그룹중 분석 데이터가 생성되지 않는 그룹이 있어서 확인 필요
-            String analysisStatus = analysisRepository.findByGroupGroupId(group.getGroupId())
-                    .map(analysis -> analysis.getAnalysisStatus().toString())
-                    .orElse(AnalysisStatus.NOT_STARTED.toString());
+            Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId())
+                    .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
+
+            String analysisStatus = analysis.getAnalysisStatus().toString();
+
+            Long analysisSettingSubmitMemberCount = analysisSettingRepository.countByAnalysis(analysis);
 
             Long groupMemberCount = memberRepository.countByGroup(group);
             resultGroupList.add(GetGroupListDTO.Response.Group.builder()
@@ -48,6 +50,7 @@ public class AdminService {
                     .groupMemberCount(groupMemberCount)
                     .analysisStatus(analysisStatus)
                     .isSingleMemberGroup(group.isSingleMemberGroup())
+                    .analysisSettingSubmitMemberCount(analysisSettingSubmitMemberCount)
                     .createdAt(group.getCreatedAt())
                     .build());
         }
@@ -57,41 +60,58 @@ public class AdminService {
                 .build();
     }
 
-    // 그룹 및 연관 데이터 삭제
+    @Transactional
     public void deleteGroupById(String groupId) {
-        // 분석 결과 관련 정보 삭제 → basis → detail → result
-        AnalysisResult result = analysisResultRepository.findByGroupGroupId(groupId)
-                .orElseThrow(RuntimeException::new);
 
-        List<AnalysisResultDetail> details = analysisResultDetailRepository.findAllByAnalysisResult(result);
-        for (AnalysisResultDetail detail : details) {
-            analysisBasisRepository.deleteAllByAnalysisResultDetail(detail);
+        if (!groupRepository.existsById(groupId)) {
+            return;
         }
-        analysisResultDetailRepository.deleteAll(details);
 
-        analysisResultRepository.delete(result);
+        // 결과(result → detail → basis)
+        analysisResultRepository.findByGroupGroupId(groupId).ifPresent(result -> {
+            List<AnalysisResultDetail> resultDetails =
+                    analysisResultDetailRepository.findAllByAnalysisResult(result);
 
-        // 분석 설정 관련 저옵 삭제 (settingDetail → location/text/category → setting)
+            if (!resultDetails.isEmpty()) {
+                analysisBasisRepository.deleteAllByAnalysisResultDetailIn(resultDetails);
+                analysisResultDetailRepository.deleteAll(resultDetails);
+            }
+            analysisResultRepository.delete(result);
+        });
+
+        // 설정(settingDetail → category/location/text → setting),
+        // 멤버별 복수 setting 존재하는 경우 대응
         List<Member> members = memberRepository.findAllByGroupGroupId(groupId);
         for (Member member : members) {
-            AnalysisSetting setting = analysisSettingRepository.findByMember(member)
-                    .orElseThrow(RuntimeException::new);
 
-            List<AnalysisSettingDetail> analysisSettingDetailList = analysisSettingDetailRepository.findAllByAnalysisSetting(setting);
-            for (AnalysisSettingDetail detail : analysisSettingDetailList) {
-                categorySettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                locationSettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                textInputSettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                analysisSettingDetailRepository.deleteById(detail.getAnalysisSettingDetailId());
+            // 멤버별 모든 설정을 조회
+            List<AnalysisSetting> settings = analysisSettingRepository.findAllByMember(member);
+            if (settings.isEmpty()) continue;
+
+            for (AnalysisSetting setting : settings) {
+                List<AnalysisSettingDetail> details =
+                        analysisSettingDetailRepository.findAllByAnalysisSetting(setting);
+
+                if (!details.isEmpty()) {
+                    List<Long> detailIds = details.stream()
+                            .map(AnalysisSettingDetail::getAnalysisSettingDetailId)
+                            .toList();
+
+                    // 하위 테이블들 조건 삭제
+                    categorySettingRepository.deleteAllByAnalysisSettingDetailIdIn(detailIds);
+                    locationSettingRepository.deleteAllByAnalysisSettingDetailIdIn(detailIds);
+                    textInputSettingRepository.deleteAllByAnalysisSettingDetailIdIn(detailIds);
+
+                    analysisSettingDetailRepository.deleteAll(details);
+                }
+
+                analysisSettingRepository.delete(setting);
             }
-
-            analysisSettingRepository.delete(setting);
         }
-        // 분석 삭제
+
+        // 분석,멤버,그룹 제거
         analysisRepository.deleteAllByGroupGroupId(groupId);
-        // 멤버 삭제
         memberRepository.deleteAllByGroupGroupId(groupId);
-        // 그룹 삭제
         groupRepository.deleteById(groupId);
     }
 }

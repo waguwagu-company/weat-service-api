@@ -24,6 +24,7 @@ public class GetGroupListDTO {
         public static class Group {
             private String groupId;
             private Long groupMemberCount;
+            private Long analysisSettingSubmitMemberCount;
             private String analysisStatus;
             private ZonedDateTime createdAt;
             @JsonProperty("isSingleMemberGroup")

@@ -12,4 +12,8 @@ public interface CategorySettingRepository extends JpaRepository<CategorySetting
     @Query("SELECT cs FROM CategorySetting cs " +
             "WHERE cs.analysisSetting.member.memberId = :memberId")
     List<CategorySetting> findAllByMemberId(@Param("memberId") Long memberId);
+
+    void deleteByAnalysisSettingDetailId(Long id);
+
+    void deleteAllByAnalysisSettingDetailIdIn(List<Long> detailIds);
 }
