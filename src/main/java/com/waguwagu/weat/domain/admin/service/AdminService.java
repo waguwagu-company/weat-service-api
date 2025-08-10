@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.admin.service;
 
+import com.waguwagu.weat.domain.admin.dto.DeleteCategoryTagDTO;
 import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
 import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
@@ -120,6 +121,14 @@ public class AdminService {
         return RenameCategoryTagDTO.Response.builder()
                 .categoryTagId(categoryTag.getCategoryTagId())
                 .categoryTagNewName(categoryTag.getCategoryTagName())
+                .build();
+    }
+
+
+   public DeleteCategoryTagDTO.Response deleteCategoryTag(Long categoryTagId){
+        categoryTagRepository.deleteById(categoryTagId);
+        return DeleteCategoryTagDTO.Response.builder()
+                .deletedCategoryTagId(categoryTagId)
                 .build();
     }
 }
