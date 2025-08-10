@@ -1,10 +1,10 @@
 package com.waguwagu.weat.domain.admin.service;
 
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisResult;
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisResultDetail;
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisSetting;
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisSettingDetail;
+import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
+import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
+import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
+import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Transactional
@@ -29,6 +30,32 @@ public class AdminService {
     private final AnalysisResultRepository analysisResultRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisBasisRepository analysisBasisRepository;
+
+    public GetGroupListDTO.Response getGroupList() {
+        List<Group> groupList = groupRepository.findAll();
+
+        List<GetGroupListDTO.Response.Group> resultGroupList = new ArrayList<>();
+
+        for (Group group : groupList) {
+            // TODO: 생성된 그룹중 분석 데이터가 생성되지 않는 그룹이 있어서 확인 필요
+            String analysisStatus = analysisRepository.findByGroupGroupId(group.getGroupId())
+                    .map(analysis -> analysis.getAnalysisStatus().toString())
+                    .orElse(AnalysisStatus.NOT_STARTED.toString());
+
+            Long groupMemberCount = memberRepository.countByGroup(group);
+            resultGroupList.add(GetGroupListDTO.Response.Group.builder()
+                    .groupId(group.getGroupId())
+                    .groupMemberCount(groupMemberCount)
+                    .analysisStatus(analysisStatus)
+                    .isSingleMemberGroup(group.isSingleMemberGroup())
+                    .createdAt(group.getCreatedAt())
+                    .build());
+        }
+
+        return GetGroupListDTO.Response.builder()
+                .groupList(resultGroupList)
+                .build();
+    }
 
     // 그룹 및 연관 데이터 삭제
     public void deleteGroupById(String groupId) {
