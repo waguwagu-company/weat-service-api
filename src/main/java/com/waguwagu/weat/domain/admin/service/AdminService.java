@@ -1,10 +1,10 @@
 package com.waguwagu.weat.domain.admin.service;
 
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisResult;
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisResultDetail;
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisSetting;
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisSettingDetail;
+import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
+import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
+import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
+import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Transactional
@@ -30,39 +31,87 @@ public class AdminService {
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisBasisRepository analysisBasisRepository;
 
+    public GetGroupListDTO.Response getGroupList() {
+        List<Group> groupList = groupRepository.findAll();
+
+        List<GetGroupListDTO.Response.Group> resultGroupList = new ArrayList<>();
+
+        for (Group group : groupList) {
+            Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId())
+                    .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
+
+            String analysisStatus = analysis.getAnalysisStatus().toString();
+
+            Long analysisSettingSubmitMemberCount = analysisSettingRepository.countByAnalysis(analysis);
+
+            Long groupMemberCount = memberRepository.countByGroup(group);
+            resultGroupList.add(GetGroupListDTO.Response.Group.builder()
+                    .groupId(group.getGroupId())
+                    .groupMemberCount(groupMemberCount)
+                    .analysisStatus(analysisStatus)
+                    .isSingleMemberGroup(group.isSingleMemberGroup())
+                    .analysisSettingSubmitMemberCount(analysisSettingSubmitMemberCount)
+                    .createdAt(group.getCreatedAt())
+                    .build());
+        }
+
+        return GetGroupListDTO.Response.builder()
+                .groupList(resultGroupList)
+                .build();
+    }
+
+    @Transactional
     public void deleteGroupById(String groupId) {
 
-        // 분석 결과 관련 정보 삭제 → basis → detail → result
-        List<AnalysisResult> results = analysisResultRepository.findAllByGroupGroupId(groupId);
-        for (AnalysisResult result : results) {
-            List<AnalysisResultDetail> details = analysisResultDetailRepository.findAllByAnalysisResult(result);
-            for (AnalysisResultDetail detail : details) {
-                analysisBasisRepository.deleteAllByAnalysisResultDetail(detail);
-            }
-            analysisResultDetailRepository.deleteAll(details);
+        if (!groupRepository.existsById(groupId)) {
+            return;
         }
-        analysisResultRepository.deleteAll(results);
 
-        // 분석 설정 관련 저옵 삭제 (settingDetail → location/text/category → setting)
+        // 결과(result → detail → basis)
+        analysisResultRepository.findByGroupGroupId(groupId).ifPresent(result -> {
+            List<AnalysisResultDetail> resultDetails =
+                    analysisResultDetailRepository.findAllByAnalysisResult(result);
+
+            if (!resultDetails.isEmpty()) {
+                analysisBasisRepository.deleteAllByAnalysisResultDetailIn(resultDetails);
+                analysisResultDetailRepository.deleteAll(resultDetails);
+            }
+            analysisResultRepository.delete(result);
+        });
+
+        // 설정(settingDetail → category/location/text → setting),
+        // 멤버별 복수 setting 존재하는 경우 대응
         List<Member> members = memberRepository.findAllByGroupGroupId(groupId);
         for (Member member : members) {
+
+            // 멤버별 모든 설정을 조회
             List<AnalysisSetting> settings = analysisSettingRepository.findAllByMember(member);
+            if (settings.isEmpty()) continue;
+
             for (AnalysisSetting setting : settings) {
-                List<AnalysisSettingDetail> details = analysisSettingDetailRepository.findAllByAnalysisSetting(setting);
-                for (AnalysisSettingDetail detail : details) {
-                    categorySettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                    locationSettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                    textInputSettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                    analysisSettingDetailRepository.deleteById(detail.getAnalysisSettingDetailId());
+                List<AnalysisSettingDetail> details =
+                        analysisSettingDetailRepository.findAllByAnalysisSetting(setting);
+
+                if (!details.isEmpty()) {
+                    List<Long> detailIds = details.stream()
+                            .map(AnalysisSettingDetail::getAnalysisSettingDetailId)
+                            .toList();
+
+                    // 하위 테이블들 조건 삭제
+                    categorySettingRepository.deleteAllByAnalysisSettingDetailIdIn(detailIds);
+                    locationSettingRepository.deleteAllByAnalysisSettingDetailIdIn(detailIds);
+                    textInputSettingRepository.deleteAllByAnalysisSettingDetailIdIn(detailIds);
+
+                    analysisSettingDetailRepository.deleteAll(details);
                 }
+
+                analysisSettingRepository.delete(setting);
             }
-            analysisSettingRepository.deleteAll(settings);
         }
-        // 분석 삭제
+
+        // 분석,멤버,그룹 제거
         analysisRepository.deleteAllByGroupGroupId(groupId);
-        // 멤버 삭제
         memberRepository.deleteAllByGroupGroupId(groupId);
-        // 그룹 삭제
         groupRepository.deleteById(groupId);
     }
 }

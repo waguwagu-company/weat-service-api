@@ -4,7 +4,8 @@ import com.waguwagu.weat.domain.analysis.model.entity.AnalysisResult;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface AnalysisResultRepository extends JpaRepository<AnalysisResult, Long> {
-    List<AnalysisResult> findAllByGroupGroupId(String groupId);
+    Optional<AnalysisResult> findByGroupGroupId(String groupId);
 }

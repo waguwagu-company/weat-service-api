@@ -12,4 +12,8 @@ public interface LocationSettingRepository extends JpaRepository<LocationSetting
     @Query("SELECT ls FROM LocationSetting ls " +
             "WHERE ls.analysisSetting.member.memberId = :memberId")
     LocationSetting findByMemberId(@Param("memberId") Long memberId);
+
+    void deleteByAnalysisSettingDetailId(Long id);
+
+    void deleteAllByAnalysisSettingDetailIdIn(List<Long> detailIds);
 }
