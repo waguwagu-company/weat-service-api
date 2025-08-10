@@ -1,14 +1,14 @@
 package com.waguwagu.weat.domain.admin.controller;
 
+import com.waguwagu.weat.domain.admin.dto.CreateCategoryTagDTO;
+import com.waguwagu.weat.domain.admin.dto.DeleteCategoryTagDTO;
 import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
+import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
 import com.waguwagu.weat.domain.admin.service.AdminService;
-import com.waguwagu.weat.domain.group.model.entity.Group;
-import lombok.Getter;
+import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +31,31 @@ public class AdminController {
 
 
     @GetMapping("/group")
-    public ResponseEntity<GetGroupListDTO.Response> getAllGroupList(){
+    public ResponseEntity<GetGroupListDTO.Response> getAllGroupList() {
         return ResponseEntity.ok(adminService.getGroupList());
+    }
+
+    @GetMapping("/group/count")
+    public ResponseEntity<Long> getAllGroupCount() {
+        return ResponseEntity.ok(adminService.getGroupCount());
+    }
+
+    @PutMapping("/categoryTags")
+    public ResponseDTO<RenameCategoryTagDTO.Response> renameCategoryTag(
+            @RequestBody RenameCategoryTagDTO.Request request) {
+        return ResponseDTO.of(adminService.renameCategoryTag(request));
+    }
+
+    @DeleteMapping("/categoryTags/{categoryTagId}")
+    public ResponseDTO<DeleteCategoryTagDTO.Response> deleteCategoryTag
+            (@PathVariable("categoryTagId") Long categoryTagId) {
+        return ResponseDTO.of(adminService.deleteCategoryTag(categoryTagId));
+    }
+
+    @PostMapping("/categories/{categoryId}/categoryTags")
+    public ResponseDTO<CreateCategoryTagDTO.Response> createCategoryTag(
+            @PathVariable("categoryId") Long categoryId,
+            @RequestBody CreateCategoryTagDTO.Request request) {
+        return ResponseDTO.of(adminService.createCategoryTag(categoryId, request));
     }
 }
