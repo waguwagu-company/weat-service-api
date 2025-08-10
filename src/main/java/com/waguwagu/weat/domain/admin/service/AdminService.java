@@ -1,13 +1,17 @@
 package com.waguwagu.weat.domain.admin.service;
 
+import com.waguwagu.weat.domain.admin.dto.CreateCategoryTagDTO;
 import com.waguwagu.weat.domain.admin.dto.DeleteCategoryTagDTO;
 import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
 import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
+import com.waguwagu.weat.domain.category.exception.CategoryNotFoundException;
 import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
+import com.waguwagu.weat.domain.category.model.entity.Category;
 import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
+import com.waguwagu.weat.domain.category.repository.CategoryRepository;
 import com.waguwagu.weat.domain.category.repository.CategoryTagRepository;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
@@ -36,6 +40,7 @@ public class AdminService {
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisBasisRepository analysisBasisRepository;
     private final CategoryTagRepository categoryTagRepository;
+    private final CategoryRepository categoryRepository;
 
     public GetGroupListDTO.Response getGroupList() {
         List<Group> groupList = groupRepository.findAll();
@@ -129,6 +134,33 @@ public class AdminService {
         categoryTagRepository.deleteById(categoryTagId);
         return DeleteCategoryTagDTO.Response.builder()
                 .deletedCategoryTagId(categoryTagId)
+                .build();
+    }
+
+    public CreateCategoryTagDTO.Response createCategoryTag(Long categoryId, CreateCategoryTagDTO.Request request){
+
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+
+        // 해당 카테고리의 기존 태그들 중 가장 마지막 순서값 찾기
+        Long lastOrder = categoryTagRepository.findByCategoryOrderByCategoryTagOrderDesc(category)
+                .stream()
+                .findFirst()
+                .map(CategoryTag::getCategoryTagOrder)
+                .orElse(1L); // 태그가 없으면 1부터 시작
+
+        CategoryTag categoryTag = CategoryTag.builder()
+                .category(category)
+                .categoryTagName(request.getCategoryTagName())
+                .categoryTagOrder(lastOrder + 1) // 기존 최대 순서값 + 1
+                .build();
+
+        CategoryTag savedTag = categoryTagRepository.save(categoryTag);
+
+        return CreateCategoryTagDTO.Response.builder()
+                .categoryTagId(savedTag.getCategoryTagId())
+                .categoryTagName(savedTag.getCategoryTagName())
+                .categoryTagOrder(savedTag.getCategoryTagOrder())
                 .build();
     }
 }

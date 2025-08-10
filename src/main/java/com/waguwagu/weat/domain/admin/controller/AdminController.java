@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.admin.controller;
 
+import com.waguwagu.weat.domain.admin.dto.CreateCategoryTagDTO;
 import com.waguwagu.weat.domain.admin.dto.DeleteCategoryTagDTO;
 import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
 import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
@@ -49,5 +50,12 @@ public class AdminController {
     public ResponseDTO<DeleteCategoryTagDTO.Response> deleteCategoryTag
             (@PathVariable("categoryTagId") Long categoryTagId) {
         return ResponseDTO.of(adminService.deleteCategoryTag(categoryTagId));
+    }
+
+    @PostMapping("/categories/{categoryId}/categoryTags")
+    public ResponseDTO<CreateCategoryTagDTO.Response> createCategoryTag(
+            @PathVariable("categoryId") Long categoryId,
+            @RequestBody CreateCategoryTagDTO.Request request) {
+        return ResponseDTO.of(adminService.createCategoryTag(categoryId, request));
     }
 }
