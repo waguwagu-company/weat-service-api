@@ -1,9 +1,13 @@
 package com.waguwagu.weat.domain.admin.service;
 
 import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
+import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
+import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
+import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
+import com.waguwagu.weat.domain.category.repository.CategoryTagRepository;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
@@ -30,6 +34,7 @@ public class AdminService {
     private final AnalysisResultRepository analysisResultRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisBasisRepository analysisBasisRepository;
+    private final CategoryTagRepository categoryTagRepository;
 
     public GetGroupListDTO.Response getGroupList() {
         List<Group> groupList = groupRepository.findAll();
@@ -37,27 +42,21 @@ public class AdminService {
         List<GetGroupListDTO.Response.Group> resultGroupList = new ArrayList<>();
 
         for (Group group : groupList) {
-            Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId())
-                    .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
+            Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId()).orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
 
             String analysisStatus = analysis.getAnalysisStatus().toString();
 
             Long analysisSettingSubmitMemberCount = analysisSettingRepository.countByAnalysis(analysis);
 
             Long groupMemberCount = memberRepository.countByGroup(group);
-            resultGroupList.add(GetGroupListDTO.Response.Group.builder()
-                    .groupId(group.getGroupId())
-                    .groupMemberCount(groupMemberCount)
-                    .analysisStatus(analysisStatus)
-                    .isSingleMemberGroup(group.isSingleMemberGroup())
-                    .analysisSettingSubmitMemberCount(analysisSettingSubmitMemberCount)
-                    .createdAt(group.getCreatedAt())
-                    .build());
+            resultGroupList.add(GetGroupListDTO.Response.Group.builder().groupId(group.getGroupId()).groupMemberCount(groupMemberCount).analysisStatus(analysisStatus).isSingleMemberGroup(group.isSingleMemberGroup()).analysisSettingSubmitMemberCount(analysisSettingSubmitMemberCount).createdAt(group.getCreatedAt()).build());
         }
 
-        return GetGroupListDTO.Response.builder()
-                .groupList(resultGroupList)
-                .build();
+        return GetGroupListDTO.Response.builder().groupList(resultGroupList).build();
+    }
+
+    public Long getGroupCount() {
+        return groupRepository.count();
     }
 
     @Transactional
@@ -69,8 +68,7 @@ public class AdminService {
 
         // 결과(result → detail → basis)
         analysisResultRepository.findByGroupGroupId(groupId).ifPresent(result -> {
-            List<AnalysisResultDetail> resultDetails =
-                    analysisResultDetailRepository.findAllByAnalysisResult(result);
+            List<AnalysisResultDetail> resultDetails = analysisResultDetailRepository.findAllByAnalysisResult(result);
 
             if (!resultDetails.isEmpty()) {
                 analysisBasisRepository.deleteAllByAnalysisResultDetailIn(resultDetails);
@@ -89,13 +87,10 @@ public class AdminService {
             if (settings.isEmpty()) continue;
 
             for (AnalysisSetting setting : settings) {
-                List<AnalysisSettingDetail> details =
-                        analysisSettingDetailRepository.findAllByAnalysisSetting(setting);
+                List<AnalysisSettingDetail> details = analysisSettingDetailRepository.findAllByAnalysisSetting(setting);
 
                 if (!details.isEmpty()) {
-                    List<Long> detailIds = details.stream()
-                            .map(AnalysisSettingDetail::getAnalysisSettingDetailId)
-                            .toList();
+                    List<Long> detailIds = details.stream().map(AnalysisSettingDetail::getAnalysisSettingDetailId).toList();
 
                     // 하위 테이블들 조건 삭제
                     categorySettingRepository.deleteAllByAnalysisSettingDetailIdIn(detailIds);
@@ -113,5 +108,18 @@ public class AdminService {
         analysisRepository.deleteAllByGroupGroupId(groupId);
         memberRepository.deleteAllByGroupGroupId(groupId);
         groupRepository.deleteById(groupId);
+    }
+
+    // 카테고리 태그 이름 변경
+    public RenameCategoryTagDTO.Response renameCategoryTag(RenameCategoryTagDTO.Request request) {
+        CategoryTag categoryTag = categoryTagRepository.findById(request.getCategoryTagId())
+                .orElseThrow(() -> new CategoryTagNotFoundException(request.getCategoryTagId()));
+
+        categoryTag.setCategoryTagName(request.getCategoryTagNewName());
+
+        return RenameCategoryTagDTO.Response.builder()
+                .categoryTagId(categoryTag.getCategoryTagId())
+                .categoryTagNewName(categoryTag.getCategoryTagName())
+                .build();
     }
 }

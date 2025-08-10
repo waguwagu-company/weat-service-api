@@ -1,7 +1,9 @@
 package com.waguwagu.weat.domain.admin.controller;
 
 import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
+import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
 import com.waguwagu.weat.domain.admin.service.AdminService;
+import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +35,12 @@ public class AdminController {
     @GetMapping("/group")
     public ResponseEntity<GetGroupListDTO.Response> getAllGroupList(){
         return ResponseEntity.ok(adminService.getGroupList());
+    }
+}
+    @PutMapping("/categoryTags")
+    public ResponseEntity<ResponseDTO<RenameCategoryTagDTO.Response>> renameCategoryTag(
+            @RequestBody RenameCategoryTagDTO.Request request) {
+
+        return ResponseEntity.ok(ResponseDTO.of(adminService.renameCategoryTag(request)));
     }
 }

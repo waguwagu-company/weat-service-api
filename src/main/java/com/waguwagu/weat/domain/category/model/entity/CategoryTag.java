@@ -18,6 +18,7 @@ public class CategoryTag {
     @Comment("카테고리 식별자")
     private Long categoryTagId;
 
+    @Setter
     @Column(name = "category_tag_name", length = 50)
     @Comment("카테고리 태그명")
     private String categoryTagName;
