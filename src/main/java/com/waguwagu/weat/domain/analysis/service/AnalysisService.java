@@ -56,8 +56,8 @@ public class AnalysisService {
                 .orElseThrow(() -> new GroupNotFoundException(groupId));
 
         String analysisStatus = analysisRepository.findByGroupGroupId(groupId)
-                .map(analysis -> analysis.getAnalysisStatus().toString())
-                .orElse(AnalysisStatus.NOT_STARTED.toString());
+                .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(groupId))
+                .getAnalysisStatus().toString();
 
         List<Member> memberList = memberRepository.findAllByGroupGroupId(groupId);
 
@@ -103,14 +103,9 @@ public class AnalysisService {
             throw new MemberAlreadySubmitSettingForMemberIdException(member.getMemberId());
         }
 
-        // 분석 정보 조회, 없는 경우 생성
+        // 분석 정보 조회
         Analysis analysis = analysisRepository.findByGroupGroupId(member.getGroup().getGroupId())
-                .orElseGet(() -> {
-                    Analysis newAnalysis = Analysis.builder()
-                            .group(member.getGroup())
-                            .build();
-                    return analysisRepository.save(newAnalysis);
-                });
+                .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(member.getGroup().getGroupId()));
 
         // 설정 정보 생성
         AnalysisSetting analysisSetting = AnalysisSetting.builder()

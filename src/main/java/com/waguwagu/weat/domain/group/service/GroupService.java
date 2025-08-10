@@ -1,5 +1,8 @@
 package com.waguwagu.weat.domain.group.service;
 
+import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
+import com.waguwagu.weat.domain.analysis.model.entity.AnalysisStatus;
+import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
 import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.mapper.GroupMapper;
@@ -24,8 +27,8 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
-
     private final GroupMapper groupMapper;
+    private final AnalysisRepository analysisRepository;
 
     @Transactional
     public CreateGroupDTO.Response createGroup(CreateGroupDTO.Request request) {
@@ -34,11 +37,20 @@ public class GroupService {
                 .build();
         groupRepository.save(group);
 
+        Analysis analysis = Analysis.builder()
+                .analysisStatus(AnalysisStatus.NOT_STARTED)
+                .group(group)
+                .build();
+
+        analysisRepository.save(analysis);
+
         Member owner = Member.builder()
                 .group(group)
                 .isGroupOwner(true)
                 .build();
         memberRepository.save(owner);
+
+
 
         return CreateGroupDTO.Response.builder()
                 .groupId(group.getGroupId())
