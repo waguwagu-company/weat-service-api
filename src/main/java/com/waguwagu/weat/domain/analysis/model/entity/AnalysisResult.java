@@ -16,7 +16,7 @@ public class AnalysisResult {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "analysis_result_id")
-    private Integer analysisResultId;
+    private Long analysisResultId;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)

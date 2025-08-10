@@ -30,33 +30,35 @@ public class AdminService {
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisBasisRepository analysisBasisRepository;
 
+    // 그룹 및 연관 데이터 삭제
     public void deleteGroupById(String groupId) {
-
         // 분석 결과 관련 정보 삭제 → basis → detail → result
-        List<AnalysisResult> results = analysisResultRepository.findAllByGroupGroupId(groupId);
-        for (AnalysisResult result : results) {
-            List<AnalysisResultDetail> details = analysisResultDetailRepository.findAllByAnalysisResult(result);
-            for (AnalysisResultDetail detail : details) {
-                analysisBasisRepository.deleteAllByAnalysisResultDetail(detail);
-            }
-            analysisResultDetailRepository.deleteAll(details);
+        AnalysisResult result = analysisResultRepository.findByGroupGroupId(groupId)
+                .orElseThrow(RuntimeException::new);
+
+        List<AnalysisResultDetail> details = analysisResultDetailRepository.findAllByAnalysisResult(result);
+        for (AnalysisResultDetail detail : details) {
+            analysisBasisRepository.deleteAllByAnalysisResultDetail(detail);
         }
-        analysisResultRepository.deleteAll(results);
+        analysisResultDetailRepository.deleteAll(details);
+
+        analysisResultRepository.delete(result);
 
         // 분석 설정 관련 저옵 삭제 (settingDetail → location/text/category → setting)
         List<Member> members = memberRepository.findAllByGroupGroupId(groupId);
         for (Member member : members) {
-            List<AnalysisSetting> settings = analysisSettingRepository.findAllByMember(member);
-            for (AnalysisSetting setting : settings) {
-                List<AnalysisSettingDetail> details = analysisSettingDetailRepository.findAllByAnalysisSetting(setting);
-                for (AnalysisSettingDetail detail : details) {
-                    categorySettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                    locationSettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                    textInputSettingRepository.deleteById(detail.getAnalysisSettingDetailId());
-                    analysisSettingDetailRepository.deleteById(detail.getAnalysisSettingDetailId());
-                }
+            AnalysisSetting setting = analysisSettingRepository.findByMember(member)
+                    .orElseThrow(RuntimeException::new);
+
+            List<AnalysisSettingDetail> analysisSettingDetailList = analysisSettingDetailRepository.findAllByAnalysisSetting(setting);
+            for (AnalysisSettingDetail detail : analysisSettingDetailList) {
+                categorySettingRepository.deleteById(detail.getAnalysisSettingDetailId());
+                locationSettingRepository.deleteById(detail.getAnalysisSettingDetailId());
+                textInputSettingRepository.deleteById(detail.getAnalysisSettingDetailId());
+                analysisSettingDetailRepository.deleteById(detail.getAnalysisSettingDetailId());
             }
-            analysisSettingRepository.deleteAll(settings);
+
+            analysisSettingRepository.delete(setting);
         }
         // 분석 삭제
         analysisRepository.deleteAllByGroupGroupId(groupId);

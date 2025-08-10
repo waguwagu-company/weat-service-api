@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface AnalysisSettingRepository extends JpaRepository<AnalysisSetting, Long> {
     Boolean existsByMemberMemberId(Long memberId);
-    List<AnalysisSetting> findAllByMember(Member member);
+    Optional<AnalysisSetting> findByMember(Member member);
 }
