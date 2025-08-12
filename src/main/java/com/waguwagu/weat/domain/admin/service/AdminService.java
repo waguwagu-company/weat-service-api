@@ -18,6 +18,9 @@ import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -60,6 +63,56 @@ public class AdminService {
 
         return GetGroupListDTO.Response.builder().groupList(resultGroupList).build();
     }
+
+
+
+    @Transactional(readOnly = true)
+    public GetGroupListDTO.Response getGroupListWithPaging(Pageable pageable, String sort, String order) {
+        Page<Group> pageResult = groupRepository.findAll(pageable);
+
+
+        List<GetGroupListDTO.Response.Group> resultGroupList = new ArrayList<>();
+        for (Group group : pageResult.getContent()) {
+            Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId())
+                    .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
+
+            String analysisStatus = analysis.getAnalysisStatus().toString();
+            Long analysisSettingSubmitMemberCount = analysisSettingRepository.countByAnalysis(analysis);
+            Long groupMemberCount = memberRepository.countByGroup(group);
+
+            resultGroupList.add(GetGroupListDTO.Response.Group.builder()
+                    .groupId(group.getGroupId())
+                    .analysisId(analysis.getAnalysisId())
+                    .groupMemberCount(groupMemberCount)
+                    .analysisStatus(analysisStatus)
+                    .isSingleMemberGroup(group.isSingleMemberGroup())
+                    .analysisSettingSubmitMemberCount(analysisSettingSubmitMemberCount)
+                    .createdAt(group.getCreatedAt())
+                    .build());
+        }
+
+        Sort sortObj = pageable.getSort();
+        Sort.Order first = sortObj.stream().findFirst().orElse(null);
+        String sortProp = (first == null) ? null : first.getProperty();
+        String orderDir = (first == null) ? null : first.getDirection().name().toLowerCase();
+
+        GetGroupListDTO.Response.PageInfo pageInfo = GetGroupListDTO.Response.PageInfo.builder()
+                .page(pageable.getPageNumber())
+                .size(pageable.getPageSize())
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
+                .hasNext(pageResult.hasNext())
+                .hasPrevious(pageResult.hasPrevious())
+                .sort(sortProp)
+                .order(orderDir)
+                .build();
+
+        return GetGroupListDTO.Response.builder()
+                .groupList(resultGroupList)
+                .pageInfo(pageInfo)
+                .build();
+    }
+
 
     public Long getGroupCount() {
         return groupRepository.count();
