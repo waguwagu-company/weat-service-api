@@ -77,6 +77,7 @@ public class GroupService {
 
         return JoinGroupDTO.Response.builder()
                 .memberId(savedMember.getMemberId())
+                .isSingleMemberGroup(group.isSingleMemberGroup())
                 .build();
     }
 
