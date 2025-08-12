@@ -13,8 +13,11 @@ public class AIAnalysisDTO {
     @Data
     @Builder
     public static class Request {
-
+        // 그룹 식별자
         private String groupId;
+
+        // 분석
+        private Long analysisId;
 
         @Builder.Default
         private List<MemberSetting> memberSettingList = new ArrayList<>();

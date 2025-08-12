@@ -24,6 +24,7 @@ public class GetGroupListDTO {
         @Builder
         public static class Group {
             private String groupId;
+            private Long analysisId;
             private Long groupMemberCount;
             private Long analysisSettingSubmitMemberCount;
             private String analysisStatus;

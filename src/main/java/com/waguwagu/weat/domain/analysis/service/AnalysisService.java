@@ -237,6 +237,7 @@ public class AnalysisService {
         // 비동기로 AI 분석서비스에 분석 요청
         analysisAsyncExecutor.startAnalysisAsync(AIAnalysisDTO.Request.builder()
                 .groupId(group.getGroupId())
+                .analysisId(analysis.getAnalysisId())
                 .memberSettingList(memberSettingList)
                 .build());
 
