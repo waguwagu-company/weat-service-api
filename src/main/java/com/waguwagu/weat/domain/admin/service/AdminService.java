@@ -55,7 +55,15 @@ public class AdminService {
             Long analysisSettingSubmitMemberCount = analysisSettingRepository.countByAnalysis(analysis);
 
             Long groupMemberCount = memberRepository.countByGroup(group);
-            resultGroupList.add(GetGroupListDTO.Response.Group.builder().groupId(group.getGroupId()).groupMemberCount(groupMemberCount).analysisStatus(analysisStatus).isSingleMemberGroup(group.isSingleMemberGroup()).analysisSettingSubmitMemberCount(analysisSettingSubmitMemberCount).createdAt(group.getCreatedAt()).build());
+            resultGroupList.add(GetGroupListDTO.Response.Group.builder()
+                    .groupId(group.getGroupId())
+                    .analysisId(analysis.getAnalysisId())
+                    .groupMemberCount(groupMemberCount)
+                    .analysisStatus(analysisStatus)
+                    .isSingleMemberGroup(group.isSingleMemberGroup())
+                    .analysisSettingSubmitMemberCount(analysisSettingSubmitMemberCount)
+                    .createdAt(group.getCreatedAt())
+                    .build());
         }
 
         return GetGroupListDTO.Response.builder().groupList(resultGroupList).build();
