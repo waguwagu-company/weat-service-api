@@ -1,5 +1,8 @@
 package com.waguwagu.weat.domain.admin.dto;
 
+import lombok.Builder;
+import lombok.Value;
+
 public class CategoryStatisticDTO {
 
     private Long categoryTagId;
@@ -8,15 +11,17 @@ public class CategoryStatisticDTO {
     private Long cnt;
     private Integer rank;
 
-    @lombok.Value @lombok.Builder
+    @Value
+    @Builder
     public class CategorySideChartDTO {
         java.util.List<String> labels;
         java.util.List<Long> counts;
     }
 
     // 전체 응답
-    @lombok.Value @lombok.Builder
-    public class CategoryPreferenceTopDTO {
+    @Value
+    @Builder
+    public static class CategoryPreferenceTopDTO {
         CategorySideChartDTO preferred;
         CategorySideChartDTO notPreferred;
     }
