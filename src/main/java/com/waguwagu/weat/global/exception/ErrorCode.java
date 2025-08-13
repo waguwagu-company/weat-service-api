@@ -11,6 +11,7 @@ public enum ErrorCode {
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "MEMBER_NOT_FOUND", "존재하지 않는 멤버입니다."),
     CATEGORY_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_NOT_FOUND", "존재하지 않는 카테고리입니다."),
     CATEGORY_TAG_NOT_FOUND(HttpStatus.NOT_FOUND, "CATEGORY_TAG_NOT_FOUND", "존재하지 않는 카테고리 태그입니다."),
+    LOCATION_SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "LOCATION_SETTING_NOT_FOUND","존재하지 않는 위치설정입니다." ),
     ANALYSIS_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS_NOT_FOUND", "존재하지 않는 분석입니다."),
     ANALYSIS_RESULT_DETAIL_NOT_FOUND(HttpStatus.NOT_FOUND, "ANALYSIS_RESULT_DETAIL_NOT_FOUND", "존재하지 않는 분석결과상세 입니다."),
     MEMBER_LIMIT_EXCEEDED(HttpStatus.CONFLICT, "GROUP_MEMBER_LIMIT", "그룹 정원을 초과했습니다."),
