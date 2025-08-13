@@ -198,6 +198,11 @@ public class AnalysisService {
 
         // 각 멤버별 설정 값 조회
         for (Member groupMember : groupMemberList) {
+            // 그룹 멤버중에 설정을 제출하지 않은 멤버는 제외
+            if (!this.isMemberSubmitAnalysisSetting(groupMember.getMemberId()).isSubmitted()) {
+                continue;
+            }
+
             // 위치 설정
             LocationSetting locationSetting =
                     locationSettingRepository.findByMemberId(groupMember.getMemberId())
