@@ -13,15 +13,15 @@ public interface LocationSettingRepository extends JpaRepository<LocationSetting
     @Query(value = """
         SELECT ls.*
         FROM 
-            analysis_setting as
+            analysis_setting aset
         JOIN 
              analysis_setting_detail asd ON 
-             asd.analysis_setting_id = as.analysis_setting_id
+             asd.analysis_setting_id = aset.analysis_setting_id
         JOIN 
              location_setting ls ON 
              ls.analysis_setting_detail_id = asd.analysis_setting_detail_id
         WHERE 
-             as.member_id = :memberId
+             aset.member_id = :memberId
         ORDER BY 
              ls.analysis_setting_detail_id DESC
         LIMIT 1
