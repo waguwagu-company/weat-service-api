@@ -1,9 +1,6 @@
 package com.waguwagu.weat.domain.admin.controller;
 
-import com.waguwagu.weat.domain.admin.dto.CreateCategoryTagDTO;
-import com.waguwagu.weat.domain.admin.dto.DeleteCategoryTagDTO;
-import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
-import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
+import com.waguwagu.weat.domain.admin.dto.*;
 import com.waguwagu.weat.domain.admin.service.AdminService;
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +9,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,10 +49,30 @@ public class AdminController {
         return ResponseEntity.ok(adminService.getGroupListWithPaging(pageable, sort, order));
     }
 
-//    @GetMapping("/group/count")
-//    public ResponseEntity<Long> getAllGroupCount() {
-//        return ResponseEntity.ok(adminService.getGroupCount());
-//    }
+
+    @GetMapping(value = "/group/count", params = {"!type"})
+    public ResponseEntity<Long> getTotalGroupCount() {
+        return ResponseEntity.ok(adminService.getGroupCount());
+    }
+
+    @GetMapping("/group/count")
+    public ResponseEntity<Long> getGroupCount(@RequestParam(required = false) String type) {
+        if ("single".equalsIgnoreCase(type)) {
+            return ResponseEntity.ok(adminService.getSingleMemberGroupCount());
+        } else if ("multi".equalsIgnoreCase(type)) {
+            return ResponseEntity.ok(adminService.getMultiMemberGroupCount());
+        } else {
+            return ResponseEntity.ok(adminService.getGroupCount());
+        }
+    }
+
+
+    @GetMapping("/daily-counts")
+    public ResponseEntity<List<GroupStatisticQueryDTO>> getDailyCounts(
+            @RequestParam(defaultValue = "Asia/Seoul") String tz
+    ) {
+        return ResponseEntity.ok(adminService.selectRecent7DaysCounts(tz));
+    }
 
     @PutMapping("/categoryTags")
     public ResponseDTO<RenameCategoryTagDTO.Response> renameCategoryTag(

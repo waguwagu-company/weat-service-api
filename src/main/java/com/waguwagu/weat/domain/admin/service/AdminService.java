@@ -1,9 +1,7 @@
 package com.waguwagu.weat.domain.admin.service;
 
-import com.waguwagu.weat.domain.admin.dto.CreateCategoryTagDTO;
-import com.waguwagu.weat.domain.admin.dto.DeleteCategoryTagDTO;
-import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
-import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
+import com.waguwagu.weat.domain.admin.dto.*;
+import com.waguwagu.weat.domain.admin.mapper.AdminMapper;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
@@ -44,6 +42,7 @@ public class AdminService {
     private final AnalysisBasisRepository analysisBasisRepository;
     private final CategoryTagRepository categoryTagRepository;
     private final CategoryRepository categoryRepository;
+    private final AdminMapper adminMapper;
 
     public GetGroupListDTO.Response getGroupList() {
         List<Group> groupList = groupRepository.findAll();
@@ -72,12 +71,26 @@ public class AdminService {
         return GetGroupListDTO.Response.builder().groupList(resultGroupList).build();
     }
 
+    public Long getTotalGroupCount(){
+        return groupRepository.count();
+    }
+
+    public Long getSingleMemberGroupCount(){
+        return groupRepository.countSingleMember();
+    }
+
+    public Long getMultiMemberGroupCount(){
+        return groupRepository.countMultiMember();
+    }
+
+    public List<GroupStatisticQueryDTO> selectRecent7DaysCounts(String timeZone){
+        return adminMapper.selectRecent7DaysCounts(timeZone);
+    }
 
 
     @Transactional(readOnly = true)
     public GetGroupListDTO.Response getGroupListWithPaging(Pageable pageable, String sort, String order) {
         Page<Group> pageResult = groupRepository.findAll(pageable);
-
 
         List<GetGroupListDTO.Response.Group> resultGroupList = new ArrayList<>();
         for (Group group : pageResult.getContent()) {
