@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.waguwagu.weat.domain.admin.mapper.AdminMapper">
+
+    <select id="selectRecent7DaysCounts" resultType="com.waguwagu.weat.domain.admin.dto.GroupStatisticQueryDTO">
+        WITH days AS (
+        SELECT generate_series(
+        (CURRENT_DATE - INTERVAL '6 days')::date,
+        CURRENT_DATE::date,
+        INTERVAL '1 day'
+        )::date AS d
+        ),
+        base AS (
+        SELECT DISTINCT
+        g.group_id,
+        (g.created_at AT TIME ZONE #{tz})::date AS d,
+        g.is_single_member_group
+        FROM analysis a
+        JOIN "group" g ON g.group_id = a.group_id
+        JOIN "member" m ON m.group_id = g.group_id
+        WHERE g.created_at >= (CURRENT_DATE - INTERVAL '6 days')
+        ),
+        agg AS (
+        SELECT
+        d,
+        COUNT(*) FILTER (WHERE is_single_member_group)      AS single_count,
+        COUNT(*) FILTER (WHERE NOT is_single_member_group)  AS multi_count
+        FROM base
+        GROUP BY d
+        )
+        SELECT
+        days.d AS date,
+        COALESCE(agg.single_count, 0) AS singleCount,
+        COALESCE(agg.multi_count, 0)  AS multiCount
+        FROM days
+        LEFT JOIN agg ON agg.d = days.d
+        ORDER BY date
+    </select>
+
+</mapper>
