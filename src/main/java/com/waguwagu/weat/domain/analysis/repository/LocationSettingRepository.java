@@ -11,9 +11,14 @@ import java.util.Optional;
 public interface LocationSettingRepository extends JpaRepository<LocationSetting, Long> {
 
     @Query(value = """
-        SELECT ls.*
+        SELECT
+             ls.analysis_setting_detail_id,
+             ls.x_position,
+             ls.y_position,
+             ls.roadname_address,
+             asd.analysis_setting_id  
         FROM 
-            analysis_setting aset
+             analysis_setting aset
         JOIN 
              analysis_setting_detail asd ON 
              asd.analysis_setting_id = aset.analysis_setting_id
