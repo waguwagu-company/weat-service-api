@@ -1,14 +1,16 @@
 package com.waguwagu.weat.domain.admin.controller;
 
-import com.waguwagu.weat.domain.admin.dto.CreateCategoryTagDTO;
-import com.waguwagu.weat.domain.admin.dto.DeleteCategoryTagDTO;
-import com.waguwagu.weat.domain.admin.dto.GetGroupListDTO;
-import com.waguwagu.weat.domain.admin.dto.RenameCategoryTagDTO;
+import com.waguwagu.weat.domain.admin.dto.*;
 import com.waguwagu.weat.domain.admin.service.AdminService;
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,14 +32,46 @@ public class AdminController {
     }
 
 
-    @GetMapping("/group")
+    @GetMapping(value = "/group", params = {"!page", "!size", "!sort", "!order"})
     public ResponseEntity<GetGroupListDTO.Response> getAllGroupList() {
         return ResponseEntity.ok(adminService.getGroupList());
     }
 
-    @GetMapping("/group/count")
-    public ResponseEntity<Long> getAllGroupCount() {
+    @GetMapping(value = "/group", params = {"page"})
+    public ResponseEntity<GetGroupListDTO.Response> getAllGroupListWithPaging(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "createdAt") String sort,
+            @RequestParam(defaultValue = "desc") String order
+    ) {
+        Sort.Direction dir = "desc".equalsIgnoreCase(order) ? Sort.Direction.DESC : Sort.Direction.ASC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(dir, sort));
+        return ResponseEntity.ok(adminService.getGroupListWithPaging(pageable, sort, order));
+    }
+
+
+    @GetMapping(value = "/group/count", params = {"!type"})
+    public ResponseEntity<Long> getTotalGroupCount() {
         return ResponseEntity.ok(adminService.getGroupCount());
+    }
+
+    @GetMapping("/group/count")
+    public ResponseEntity<Long> getGroupCount(@RequestParam(required = false) String type) {
+        if ("single".equalsIgnoreCase(type)) {
+            return ResponseEntity.ok(adminService.getSingleMemberGroupCount());
+        } else if ("multi".equalsIgnoreCase(type)) {
+            return ResponseEntity.ok(adminService.getMultiMemberGroupCount());
+        } else {
+            return ResponseEntity.ok(adminService.getGroupCount());
+        }
+    }
+
+
+    @GetMapping("/daily-counts")
+    public ResponseEntity<List<GroupStatisticQueryDTO>> getDailyCounts(
+            @RequestParam(defaultValue = "Asia/Seoul") String tz
+    ) {
+        return ResponseEntity.ok(adminService.selectRecent7DaysCounts(tz));
     }
 
     @PutMapping("/categoryTags")

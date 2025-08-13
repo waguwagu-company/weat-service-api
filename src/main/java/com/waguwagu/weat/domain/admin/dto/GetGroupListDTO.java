@@ -14,10 +14,11 @@ public class GetGroupListDTO {
 
     @Getter
     @Builder
-    public static class Response{
+    public static class Response {
 
         @Builder.Default
-        List<Group> groupList = new ArrayList<>();
+        private List<Group> groupList = new ArrayList<>();
+        private PageInfo pageInfo;
 
         @Getter
         @Builder
@@ -30,6 +31,19 @@ public class GetGroupListDTO {
             private ZonedDateTime createdAt;
             @JsonProperty("isSingleMemberGroup")
             private boolean isSingleMemberGroup;
+        }
+
+        @Getter
+        @Builder
+        public static class PageInfo {
+            private int page;              // 0-base
+            private int size;
+            private long totalElements;
+            private int totalPages;
+            private boolean hasNext;
+            private boolean hasPrevious;
+            private String sort;           // 정렬 필드
+            private String order;          // asc/desc
         }
     }
 
