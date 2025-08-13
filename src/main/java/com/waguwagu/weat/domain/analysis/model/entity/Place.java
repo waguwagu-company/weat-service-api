@@ -16,9 +16,9 @@ public class Place {
     @Column(name = "place_id")
     private Integer placeId;
 
-    @Column(name = "place_name", length = 50)
+    @Column(name = "place_name", length = 255)
     private String placeName;
 
-    @Column(name = "place_roadname_address", length = 100)
+    @Column(name = "place_roadname_address", length = 255)
     private String placeRoadnameAddress;
 }
