@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.analysis.controller;
 
+import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.service.AnalysisService;
 import com.waguwagu.weat.domain.common.dto.ResponseDTO;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.async.DeferredResult;
 
 @RestController
 @RequiredArgsConstructor
@@ -220,7 +222,6 @@ public class AnalysisController {
 
 
     @Operation(summary = "사용자 입력값 유효성 검증", description = "사용자가 입력한 값의 유효성을 검증한다.")
-    @PostMapping("/validation/input")
     @ApiResponse(
             responseCode = "200",
             description = "성공",
@@ -249,8 +250,12 @@ public class AnalysisController {
                     }
             )
     )
-    public ResponseDTO<ValidationDTO.Response> validateInput(@RequestBody ValidationDTO.Request request) {
-        return ResponseDTO.of(analysisService.validateInput(request));
+    @PostMapping("/validation/input")
+    public DeferredResult<ResponseDTO<ValidationDTO.Response>> validateInput(@RequestBody ValidationDTO.Request request) {
+        return AIServiceAdaptor.toDeferredResponseDTO(
+                analysisService.validateInput(request),
+                60_000L
+        );
     }
 
     @Operation(summary = "분석결과상세(장소)별 좋아요 토글", description = "분석결과의 각 장소에 대해 좋아요를 활성화 또는 비활성화한다.")

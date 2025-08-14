@@ -18,9 +18,12 @@ import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -45,6 +48,12 @@ public class AnalysisService {
     private final CategoryTagRepository categoryTagRepository;
     private final AnalysisResultLikeRepository analysisResultLikeRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
+
+
+    @Value("${ai.service.uri.validation}")
+    private String validationUri;
+
+    private static final Duration AI_TIMEOUT = Duration.ofSeconds(60);
 
     // 분석 시작가능조건 충족여부 및 분석상태 조회
     public GetAnalysisStatusDTO.Response getAnalysisStatus(String groupId) {
@@ -248,8 +257,8 @@ public class AnalysisService {
                 .build();
     }
 
-    public ValidationDTO.Response validateInput(ValidationDTO.Request request) {
-        return aiServiceAdaptor.requestValidation(request);
+    public Mono<ValidationDTO.Response> validateInput(ValidationDTO.Request request) {
+        return aiServiceAdaptor.postJson(validationUri, request, ValidationDTO.Response.class, AI_TIMEOUT);
     }
 
 
