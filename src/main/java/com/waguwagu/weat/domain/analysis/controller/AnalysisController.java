@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.async.DeferredResult;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequiredArgsConstructor
@@ -251,11 +251,9 @@ public class AnalysisController {
             )
     )
     @PostMapping("/validation/input")
-    public DeferredResult<ResponseDTO<ValidationDTO.Response>> validateInput(@RequestBody ValidationDTO.Request request) {
-        return AIServiceAdaptor.toDeferredResponseDTO(
-                analysisService.validateInput(request),
-                60_000L
-        );
+    public Mono<ResponseDTO<ValidationDTO.Response>> validateInput(@RequestBody ValidationDTO.Request request) {
+        return analysisService.validateInput(request)
+                .map(ResponseDTO::of);
     }
 
     @Operation(summary = "분석결과상세(장소)별 좋아요 토글", description = "분석결과의 각 장소에 대해 좋아요를 활성화 또는 비활성화한다.")
