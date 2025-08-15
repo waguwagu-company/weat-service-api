@@ -69,7 +69,7 @@ public class AnalysisAsyncExecutor {
                                             .build())
                             .build();
                     analysisStatus = AnalysisStatus.FAILED;
-                    log.error("** AI 분석 서버 요청 실패");
+                    log.error("** AI 분석 서버 요청 실패 => {}", e.getMessage());
                 }
 
                 log.info("** response => {}", response);
