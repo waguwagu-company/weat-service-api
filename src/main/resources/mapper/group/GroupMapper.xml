@@ -11,6 +11,7 @@
             ard.analysis_result_detail_content AS analysisResultDetailContent,
             ab.analysis_basis_type             AS analysisBasisType,
             ab.analysis_basis_content          AS analysisBasisContent,
+            ab.analysis_score                  AS analysisScore,
             p.place_id                         AS placeId,
             p.place_name                       AS placeName,
             p.place_roadname_address           AS placeRoadnameAddress

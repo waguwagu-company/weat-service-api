@@ -100,7 +100,11 @@ public class GroupService {
                     GroupAnalysisBasisQueryDTO first = group.get(0);
 
                     List<AnalysisBasisDTO> analysisBasisList = group.stream()
-                            .map(g -> new AnalysisBasisDTO(g.getAnalysisBasisType(), g.getAnalysisBasisContent()))
+                            .map(g -> AnalysisBasisDTO.builder()
+                                    .analysisBasisContent(g.getAnalysisBasisContent())
+                                    .analysisBasisType(g.getAnalysisBasisType())
+                                    .analysisScore(g.getAnalysisScore())
+                                    .build())
                             .distinct()
                             .collect(Collectors.toList());
 

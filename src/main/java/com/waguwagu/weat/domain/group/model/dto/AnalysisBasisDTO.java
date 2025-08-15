@@ -18,4 +18,7 @@ public class AnalysisBasisDTO {
 
     @Schema(description = "분석 근거 내용")
     private String analysisBasisContent;
+
+    @Schema(description = "분석 점수")
+    private int analysisScore;
 }
