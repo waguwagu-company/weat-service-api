@@ -2,16 +2,12 @@ package com.waguwagu.weat.domain.analysis.service;
 
 import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
-import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
 import com.waguwagu.weat.domain.analysis.model.dto.AIAnalysisDTO;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
-import com.waguwagu.weat.domain.category.model.entity.Category;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.entity.Group;
-import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
-import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,7 +15,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
@@ -109,6 +104,7 @@ public class AnalysisAsyncExecutor {
                         AnalysisResultDetail resultDetail = analysisResultDetailRepository.save(
                                 AnalysisResultDetail.builder()
                                         .analysisResult(result)
+                                        .analysisResultDetailTemplateMessage(detail.getAnalysisResultDetailTemplateMessage())
                                         .analysisResultDetailContent(detail.getAnalysisResultDetailContent())
                                         .place(place)
                                         .build()

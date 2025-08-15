@@ -26,4 +26,7 @@ public class AnalysisResultDetail {
 
     @Column(name = "analysis_result_detail_content", columnDefinition = "text")
     private String analysisResultDetailContent;
+
+    @Column(name = "analysis_result_detail_template_message", columnDefinition = "text")
+    private String analysisResultDetailTemplateMessage;
 }

@@ -8,6 +8,7 @@ public class GroupAnalysisBasisQueryDTO {
     private Long placeId;
     private String placeName;
     private String placeRoadnameAddress;
+    private String analysisResultDetailTemplateMessage;
     private String analysisResultDetailContent;
     private String analysisBasisType;
     private String analysisBasisContent;
