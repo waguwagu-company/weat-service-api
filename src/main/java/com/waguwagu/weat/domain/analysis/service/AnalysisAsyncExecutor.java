@@ -48,16 +48,38 @@ public class AnalysisAsyncExecutor {
                     .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
 
             TransactionTemplate tx = new TransactionTemplate(transactionManager);
-            log.info("request => {}", request);
+            log.info("** request => {}", request);
+
+            AIAnalysisDTO.Response response;
+            AnalysisStatus analysisStatus = AnalysisStatus.COMPLETED;
 
             try {
-                AIAnalysisDTO.Response response =
-                        aiServiceAdaptor.requestAnalysis(request);
+                // AI 서버에 요청 실패하는 경우, 분석 실패 상태로 기록하고 응답(analysisResultDetailList)은 빈값으로 보내서,
+                // 마치 분석 결과가 없는 것처럼 표시
+                try {
+                    response = aiServiceAdaptor.requestAnalysis(request);
+                    log.info("** AI 분석 서버 처리 성공");
+                } catch (Exception e) {
+                    // AI 서버에 분석 요청 과정에서 오류 발생 시, 로깅
+                    response = AIAnalysisDTO.Response.builder()
+                            .groupId(group.getGroupId())
+                            .analysisResult(
+                                    AIAnalysisDTO.Response.AnalysisResult.builder()
+                                            .analysisResultDetailList(new ArrayList<>())
+                                            .build())
+                            .build();
+                    analysisStatus = AnalysisStatus.FAILED;
+                    log.error("** AI 분석 서버 요청 실패");
+                }
 
-                log.info("response => {}", response);
+                log.info("** response => {}", response);
+
+                AIAnalysisDTO.Response finalResponse = response;
+                AnalysisStatus finalAnalysisStatus = analysisStatus;
 
                 // 트랜잭션 시작
                 tx.executeWithoutResult(status -> {
+
                     // 결과 저장
                     AnalysisResult result = analysisResultRepository.save(
                             AnalysisResult.builder()
@@ -66,7 +88,7 @@ public class AnalysisAsyncExecutor {
                                     .build()
                     );
 
-                    for (var detail : response.getAnalysisResult().getAnalysisResultDetailList()) {
+                    for (var detail : finalResponse.getAnalysisResult().getAnalysisResultDetailList()) {
                         // 장소 저장
                         var placeInfo = detail.getPlace();
                         Place place = placeRepository.save(Place.builder()
@@ -105,7 +127,7 @@ public class AnalysisAsyncExecutor {
                     }
 
                     // 분석 상태 완료 처리
-                    analysis.setAnalysisStatus(AnalysisStatus.COMPLETED);
+                    analysis.setAnalysisStatus(finalAnalysisStatus);
                     analysisRepository.save(analysis);
                 });
 

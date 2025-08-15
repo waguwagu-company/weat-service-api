@@ -57,14 +57,17 @@ public class AIAnalysisDTO {
     }
 
     @Data
+    @Builder
     public static class Response {
 
         private String groupId;
         private AnalysisResult analysisResult;
 
         @Data
+        @Builder
         public static class AnalysisResult {
 
+            @Builder.Default
             List<AnalysisResultDetial> analysisResultDetailList = new ArrayList<>();
 
             @Data
