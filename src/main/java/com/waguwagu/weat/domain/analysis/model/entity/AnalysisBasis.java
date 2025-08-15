@@ -25,4 +25,7 @@ public class AnalysisBasis {
 
     @Column(name = "analysis_basis_content", columnDefinition = "text")
     private String analysisBasisContent;
+
+    @Column(name = "analysis_score")
+    private Integer analysisScore;
 }

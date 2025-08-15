@@ -14,6 +14,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -61,6 +63,28 @@ public class AIServiceAdaptor {
                         }))
                 .bodyToMono(ValidationDTO.Response.class)
                 .block();
+    }
+
+
+    /** 공통 POST(JSON) */
+    public <Request, Response> Mono<Response> postJson(String uri, Request payload, Class<Response> responseType, Duration timeout) {
+        return aiWebClient.post()
+                .uri(uri)
+                .bodyValue(payload)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, resp ->
+                        resp.bodyToMono(AIErrorResponse.class)
+                                .flatMap(err -> {
+                                    log.error("[AI ERROR] uri={}, code={}, message={}", uri, err.getCode(), err.getMessage());
+                                    return Mono.error(new AIServerException(err.getMessage()));
+                                })
+                )
+                .bodyToMono(responseType)
+                .timeout(timeout)
+                // 로그용 (임시)
+                .doOnSubscribe(s -> log.info("[AI REQ] uri={}, payload={}", uri, payload))
+                .doOnNext(response -> log.info("[AI OK] uri={}, response={}", uri, response))
+                .doOnError(e -> log.error("[AI FAIL] uri={}, error={}", uri, e.toString()));
     }
 
 }

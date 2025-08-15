@@ -106,6 +106,7 @@ public class AIAnalysisDTO {
                 public static class AnalysisBasis {
                     private String analysisBasisType;
                     private String analysisBasisContent;
+                    private int analysisScore;
                 }
             }
         }
