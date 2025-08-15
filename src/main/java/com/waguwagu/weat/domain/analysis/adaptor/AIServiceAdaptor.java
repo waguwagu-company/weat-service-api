@@ -27,33 +27,25 @@ public class AIServiceAdaptor {
     @Value("${ai.service.uri.validation}")
     private String validationUri;
 
-    private final RestTemplate aiRestTemplate;
-
     private final WebClient aiWebClient;
 
 
     public AIAnalysisDTO.Response requestAnalysis(AIAnalysisDTO.Request payload) {
-        String url = baseURL + analysisUri;
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<AIAnalysisDTO.Request > request = new HttpEntity<>(payload, headers);
-        log.info("payload => {}", payload);
-        try {
-            ResponseEntity<AIAnalysisDTO.Response> response = aiRestTemplate.exchange(
-                    url,
-                    HttpMethod.POST,
-                    request,
-                    AIAnalysisDTO.Response.class
-            );
-
-            return response.getBody();
-
-        } catch (Exception e) {
-            log.error("AI 분석 요청 실패", e);
-            throw new RuntimeException("AI 분석 요청 중 오류 발생", e);
-        }
+        return aiWebClient.post()
+                .uri(analysisUri)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(payload)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response ->
+                        response.bodyToMono(AIErrorResponse.class)
+                                .flatMap(error -> {
+                                    log.error("AI 오류 - code: {}, message: {}", error.getCode(), error.getMessage());
+                                    return Mono.error(new AIServerException(error.getMessage()));
+                                })
+                )
+                .bodyToMono(AIAnalysisDTO.Response.class)
+                .doOnSubscribe(s -> log.info("payload => {}", payload))
+                .block();
     }
 
     public ValidationDTO.Response requestValidation(ValidationDTO.Request payload) {
