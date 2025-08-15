@@ -14,28 +14,37 @@ import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class AnalysisAsyncExecutor {
 
-    private final AIServiceAdaptor aiServiceAdaptor;
     private final AnalysisResultRepository analysisResultRepository;
     private final PlaceRepository placeRepository;
     private final PlaceImageRepository placeImageRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisBasisRepository analysisBasisRepository;
     private final AnalysisRepository analysisRepository;
-    private final PlatformTransactionManager transactionManager;
     private final GroupRepository groupRepository;
+
+    private final AIServiceAdaptor aiServiceAdaptor;
+    private final PlatformTransactionManager transactionManager;
+    private final Executor analysisExecutor;
+
+    @Value("${ai.service.uri.analysis}")
+    private String analysisUri;
 
     // TODO: 추후 스레드 풀 설정
     public void startAnalysisAsync(AIAnalysisDTO.Request request) {
@@ -52,7 +61,12 @@ public class AnalysisAsyncExecutor {
 
             try {
                 AIAnalysisDTO.Response response =
-                        aiServiceAdaptor.requestAnalysis(request);
+                        aiServiceAdaptor.postJson(
+                                analysisUri,
+                                request,
+                                AIAnalysisDTO.Response.class,
+                                Duration.ofSeconds(60)
+                        ).toFuture().get(60, TimeUnit.SECONDS);
 
                 log.info("response => {}", response);
 
@@ -115,6 +129,6 @@ public class AnalysisAsyncExecutor {
                 analysis.setAnalysisStatus(AnalysisStatus.FAILED);
                 analysisRepository.save(analysis);
             }
-        });
+        }, analysisExecutor);
     }
 }
