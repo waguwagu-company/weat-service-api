@@ -70,13 +70,13 @@ public class AIAnalysisDTO {
         public static class AnalysisResult {
 
             @Builder.Default
-            List<AnalysisResultDetial> analysisResultDetailList = new ArrayList<>();
+            List<AnalysisResultDetail> analysisResultDetailList = new ArrayList<>();
 
             @Data
             @Builder
             @NoArgsConstructor
             @AllArgsConstructor
-            public static class AnalysisResultDetial {
+            public static class AnalysisResultDetail {
 
                 private Place place;
                 @Builder.Default
@@ -105,6 +105,7 @@ public class AIAnalysisDTO {
                 public static class AnalysisBasis {
                     private String analysisBasisType;
                     private String analysisBasisContent;
+                    private int analysisScore;
                 }
             }
         }

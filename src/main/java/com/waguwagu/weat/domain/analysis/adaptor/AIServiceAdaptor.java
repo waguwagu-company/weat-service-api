@@ -29,7 +29,6 @@ public class AIServiceAdaptor {
     @Value("${ai.service.uri.validation}")
     private String validationUri;
 
-    private final RestTemplate aiRestTemplate;
     private final WebClient aiWebClient;
 
 
@@ -87,16 +86,5 @@ public class AIServiceAdaptor {
                 .doOnNext(response -> log.info("[AI OK] uri={}, response={}", uri, response))
                 .doOnError(e -> log.error("[AI FAIL] uri={}, error={}", uri, e.toString()));
     }
-
-
-    /** Mono<T>를 DeferredResult<ResponseDTO<T>>로 변환 */
-    /*public static <T> DeferredResult<ResponseDTO<T>> toDeferredResponseDTO(Mono<T> mono, long timeoutMillis) {
-        DeferredResult<ResponseDTO<T>> dr = new DeferredResult<>(timeoutMillis);
-        mono.subscribe(
-                result -> dr.setResult(ResponseDTO.of(result)),  // 성공
-                error  -> dr.setErrorResult(error)        // 실패
-        );
-        return dr;
-    }*/
 
 }

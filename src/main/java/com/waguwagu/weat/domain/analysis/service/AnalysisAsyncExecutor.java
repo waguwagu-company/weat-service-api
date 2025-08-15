@@ -116,11 +116,13 @@ public class AnalysisAsyncExecutor {
 
                         // 분석 근거 저장
                         for (var basis : detail.getAnalysisBasisList()) {
+                            log.info("basis: {}", basis);
                             analysisBasisRepository.save(
                                     AnalysisBasis.builder()
                                             .analysisResultDetail(resultDetail)
                                             .analysisBasisType(basis.getAnalysisBasisType())
                                             .analysisBasisContent(basis.getAnalysisBasisContent())
+                                            .analysisScore(basis.getAnalysisScore())
                                             .build()
                             );
                         }
