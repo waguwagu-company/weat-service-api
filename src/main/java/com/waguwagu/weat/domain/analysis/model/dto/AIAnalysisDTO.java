@@ -1,9 +1,7 @@
 package com.waguwagu.weat.domain.analysis.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,6 +56,8 @@ public class AIAnalysisDTO {
 
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Response {
 
         private String groupId;
@@ -65,19 +65,27 @@ public class AIAnalysisDTO {
 
         @Data
         @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor
         public static class AnalysisResult {
 
             @Builder.Default
             List<AnalysisResultDetial> analysisResultDetailList = new ArrayList<>();
 
             @Data
+            @Builder
+            @NoArgsConstructor
+            @AllArgsConstructor
             public static class AnalysisResultDetial {
 
                 private Place place;
+                @Builder.Default
                 private List<AnalysisBasis> analysisBasisList = new ArrayList<>();
                 private String analysisResultDetailContent;
 
                 @Data
+                @NoArgsConstructor
+                @AllArgsConstructor
                 public static class Place {
                     private String placeName;
                     private String placeRoadNameAddress;
@@ -85,11 +93,15 @@ public class AIAnalysisDTO {
                 }
 
                 @Data
+                @NoArgsConstructor
+                @AllArgsConstructor
                 public static class PlaceImage {
                     private String placeImageUrl;
                 }
 
                 @Data
+                @NoArgsConstructor
+                @AllArgsConstructor
                 public static class AnalysisBasis {
                     private String analysisBasisType;
                     private String analysisBasisContent;
