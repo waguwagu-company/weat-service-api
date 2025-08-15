@@ -14,37 +14,28 @@ import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class AnalysisAsyncExecutor {
 
+    private final AIServiceAdaptor aiServiceAdaptor;
     private final AnalysisResultRepository analysisResultRepository;
     private final PlaceRepository placeRepository;
     private final PlaceImageRepository placeImageRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final AnalysisBasisRepository analysisBasisRepository;
     private final AnalysisRepository analysisRepository;
-    private final GroupRepository groupRepository;
-
-    private final AIServiceAdaptor aiServiceAdaptor;
     private final PlatformTransactionManager transactionManager;
-    private final Executor analysisExecutor;
-
-    @Value("${ai.service.uri.analysis}")
-    private String analysisUri;
+    private final GroupRepository groupRepository;
 
     // TODO: 추후 스레드 풀 설정
     public void startAnalysisAsync(AIAnalysisDTO.Request request) {
@@ -57,21 +48,38 @@ public class AnalysisAsyncExecutor {
                     .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
 
             TransactionTemplate tx = new TransactionTemplate(transactionManager);
-            log.info("request => {}", request);
+            log.info("** request => {}", request);
+
+            AIAnalysisDTO.Response response;
+            AnalysisStatus analysisStatus = AnalysisStatus.COMPLETED;
 
             try {
-                AIAnalysisDTO.Response response =
-                        aiServiceAdaptor.postJson(
-                                analysisUri,
-                                request,
-                                AIAnalysisDTO.Response.class,
-                                Duration.ofSeconds(60)
-                        ).toFuture().get(60, TimeUnit.SECONDS);
+                // AI 서버에 요청 실패하는 경우, 분석 실패 상태로 기록하고 응답(analysisResultDetailList)은 빈값으로 보내서,
+                // 마치 분석 결과가 없는 것처럼 표시
+                try {
+                    response = aiServiceAdaptor.requestAnalysis(request);
+                    log.info("** AI 분석 서버 처리 성공");
+                } catch (Exception e) {
+                    // AI 서버에 분석 요청 과정에서 오류 발생 시, 로깅
+                    response = AIAnalysisDTO.Response.builder()
+                            .groupId(group.getGroupId())
+                            .analysisResult(
+                                    AIAnalysisDTO.Response.AnalysisResult.builder()
+                                            .analysisResultDetailList(new ArrayList<>())
+                                            .build())
+                            .build();
+                    analysisStatus = AnalysisStatus.FAILED;
+                    log.error("** AI 분석 서버 요청 실패 => {}", e.getMessage());
+                }
 
-                log.info("response => {}", response);
+                log.info("** response => {}", response);
+
+                AIAnalysisDTO.Response finalResponse = response;
+                AnalysisStatus finalAnalysisStatus = analysisStatus;
 
                 // 트랜잭션 시작
                 tx.executeWithoutResult(status -> {
+
                     // 결과 저장
                     AnalysisResult result = analysisResultRepository.save(
                             AnalysisResult.builder()
@@ -80,7 +88,7 @@ public class AnalysisAsyncExecutor {
                                     .build()
                     );
 
-                    for (var detail : response.getAnalysisResult().getAnalysisResultDetailList()) {
+                    for (var detail : finalResponse.getAnalysisResult().getAnalysisResultDetailList()) {
                         // 장소 저장
                         var placeInfo = detail.getPlace();
                         Place place = placeRepository.save(Place.builder()
@@ -119,7 +127,7 @@ public class AnalysisAsyncExecutor {
                     }
 
                     // 분석 상태 완료 처리
-                    analysis.setAnalysisStatus(AnalysisStatus.COMPLETED);
+                    analysis.setAnalysisStatus(finalAnalysisStatus);
                     analysisRepository.save(analysis);
                 });
 
@@ -129,6 +137,6 @@ public class AnalysisAsyncExecutor {
                 analysis.setAnalysisStatus(AnalysisStatus.FAILED);
                 analysisRepository.save(analysis);
             }
-        }, analysisExecutor);
+        });
     }
 }
