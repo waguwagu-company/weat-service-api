@@ -115,6 +115,7 @@ public class GroupService {
                             .placeId(first.getPlaceId())
                             .placeName(first.getPlaceName())
                             .placeAddress(first.getPlaceRoadnameAddress())
+                            .analysisResultTemplateMessage(first.getAnalysisResultDetailTemplateMessage())
                             .analysisResultContent(first.getAnalysisResultDetailContent())
                             .analysisBasisList(analysisBasisList)
                             .placeImageList(placeImageList)

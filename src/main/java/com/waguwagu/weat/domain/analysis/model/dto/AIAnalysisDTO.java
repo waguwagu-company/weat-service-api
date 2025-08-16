@@ -79,9 +79,10 @@ public class AIAnalysisDTO {
             public static class AnalysisResultDetail {
 
                 private Place place;
+                private String analysisResultDetailTemplateMessage;
+                private String analysisResultDetailContent;
                 @Builder.Default
                 private List<AnalysisBasis> analysisBasisList = new ArrayList<>();
-                private String analysisResultDetailContent;
 
                 @Data
                 @NoArgsConstructor
