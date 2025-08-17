@@ -240,6 +240,7 @@ public class AnalysisService {
                             .memberId(groupMember.getMemberId())
                             .xPosition(locationSetting.getXPosition())
                             .yPosition(locationSetting.getYPosition())
+                            .roadnameAddress(locationSetting.getRoadnameAddress())
                             .categoryList(memberSettingCategoryList)
                             .inputText(textInputSetting.getInputText())
                             .build();

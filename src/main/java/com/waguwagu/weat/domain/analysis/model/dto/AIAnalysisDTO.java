@@ -31,6 +31,7 @@ public class AIAnalysisDTO {
             private Double xPosition;
             @JsonProperty("yPosition")
             private Double yPosition;
+            private String roadnameAddress;
 
             // 카테고리 호/불호 설정
             @Builder.Default
