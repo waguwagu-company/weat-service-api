@@ -21,4 +21,7 @@ public class Place {
 
     @Column(name = "place_roadname_address", length = 255)
     private String placeRoadnameAddress;
+
+    @Column(name = "place_url")
+    private String placeUrl;
 }

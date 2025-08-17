@@ -17,6 +17,7 @@
             p.place_id                                      AS placeId,
             p.place_name                                    AS placeName,
             p.place_roadname_address                        AS placeRoadnameAddress,
+            p.place_url                                     AS placeUrl,
             pi.place_image_url                              AS placeImageUrl
         FROM "group" g
                  JOIN analysis_result ar ON g.group_id = ar.group_id

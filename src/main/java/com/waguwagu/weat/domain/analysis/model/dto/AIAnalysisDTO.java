@@ -70,7 +70,7 @@ public class AIAnalysisDTO {
         public static class AnalysisResult {
 
             @Builder.Default
-            List<AnalysisResultDetail> analysisResultDetailList = new ArrayList<>();
+            private List<AnalysisResultDetail> analysisResultDetailList = new ArrayList<>();
 
             @Data
             @Builder
@@ -90,6 +90,7 @@ public class AIAnalysisDTO {
                 @AllArgsConstructor
                 public static class Place {
                     private String placeName;
+                    private String placeUrl;
                     private String placeRoadNameAddress;
                     private List<PlaceImage> placeImageList;
                 }

@@ -13,6 +13,7 @@ public class GroupAnalysisBasisQueryDTO {
     private String placeRoadnameAddress;
     //private String analysisResultDetailTemplateMessage;
     //private String analysisResultDetailContent;
+    private String placeUrl;
     private int analysisScore;
     private String analysisBasisType;
     private String analysisBasisContent;

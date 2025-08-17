@@ -89,6 +89,7 @@ public class AnalysisAsyncExecutor {
                         Place place = placeRepository.save(Place.builder()
                                 .placeName(placeInfo.getPlaceName())
                                 .placeRoadnameAddress(placeInfo.getPlaceRoadNameAddress())
+                                .placeUrl(placeInfo.getPlaceUrl())
                                 .build());
 
                         if (placeInfo.getPlaceImageList() != null) {

@@ -24,6 +24,9 @@ public class GroupResultDetailDTO {
     @Schema(description = "장소 주소")
     private String placeAddress;
 
+    @Schema(description = "장소 URL")
+    private String placeUrl;
+
     @Schema(description = "키워드 목록")
     private List<String> keywordList;
 

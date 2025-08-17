@@ -91,6 +91,7 @@ public class GroupService {
                         .placeId(r.getPlaceId())
                         .placeName(r.getPlaceName())
                         .placeAddress(r.getPlaceRoadnameAddress())
+                        .placeUrl(r.getPlaceUrl())
                         .keywordList(JsonbUtils.parseOrDefault(
                                 r.getAnalysisResultKeywords(),
                                 new TypeReference<>() {},
