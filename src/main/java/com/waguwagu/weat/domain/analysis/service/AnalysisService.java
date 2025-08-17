@@ -136,15 +136,13 @@ public class AnalysisService {
 
         // 카테고리 설정
         for (SubmitAnalysisSettingDTO.Request.CategorySetting categorySettingDTO : requestDto.getCategorySettingList()) {
-            Category category = categoryRepository.findById(categorySettingDTO.getCategoryId())
-                    .orElseThrow(() -> new CategoryNotFoundException(categorySettingDTO.getCategoryId()));
 
             CategoryTag categoryTag = categoryTagRepository.findById(categorySettingDTO.getCategoryTagId())
                     .orElseThrow(() -> new CategoryTagNotFoundException(categorySettingDTO.getCategoryTagId()));
 
             CategorySetting categorySetting = CategorySetting.builder()
                     .analysisSetting(analysisSetting)
-                    .category(category)
+                    .category(categoryTag.getCategory())
                     .categoryTag(categoryTag)
                     .isPreferred(categorySettingDTO.getIsPreferred())
                     .build();

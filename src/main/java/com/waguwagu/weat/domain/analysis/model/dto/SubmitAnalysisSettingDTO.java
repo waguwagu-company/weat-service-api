@@ -53,8 +53,6 @@ public class SubmitAnalysisSettingDTO {
         @Getter
         @Schema(description = "카테고리 설정")
         public static class CategorySetting {
-            @Schema(description = "카테고리 식별자", example = "1")
-            private Long categoryId;
 
             @Schema(description = "카테고리태그 식별자", example = "1")
             private Long categoryTagId;
