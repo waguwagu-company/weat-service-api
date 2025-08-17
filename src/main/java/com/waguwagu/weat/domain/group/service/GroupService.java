@@ -1,8 +1,10 @@
 package com.waguwagu.weat.domain.group.service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
 import com.waguwagu.weat.domain.analysis.model.entity.AnalysisStatus;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
+import com.waguwagu.weat.domain.common.utils.JsonbUtils;
 import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.mapper.GroupMapper;
@@ -82,15 +84,17 @@ public class GroupService {
     public GroupResultDTO.Response getGroupResult(String groupId) {
         List<GroupAnalysisBasisQueryDTO> queryResults = groupMapper.selectGroupAnalysisBasis(groupId);
 
-        // 현재 변경된 기획상 분석 근거 1개, 이미지 1개이므로 placeId 기준 1건만 사용
+        // 분석 근거 1개, 이미지 1개이므로 placeId 기준 1건만 사용
         List<GroupResultDetailDTO> result = queryResults.stream()
                 .map(r -> GroupResultDetailDTO.builder()
                         .analysisResultDetailId(r.getAnalysisResultDetailId())
                         .placeId(r.getPlaceId())
                         .placeName(r.getPlaceName())
                         .placeAddress(r.getPlaceRoadnameAddress())
-                        // TODO: ai server 처리 결정 후 다시 작업
-                        .keywordList(new ArrayList<>())
+                        .keywordList(JsonbUtils.parseOrDefault(
+                                r.getAnalysisResultKeywords(),
+                                new TypeReference<>() {},
+                                List.of()))
                         .analysisBasisType(r.getAnalysisBasisType())
                         .analysisBasisContent(r.getAnalysisBasisContent())
                         .analysisScore(r.getAnalysisScore())

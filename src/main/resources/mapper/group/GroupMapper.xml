@@ -8,6 +8,7 @@
     <select id="selectGroupAnalysisBasis" resultType="com.waguwagu.weat.domain.group.model.dto.GroupAnalysisBasisQueryDTO">
         SELECT distinct on (p.place_id)
             ard.analysis_result_detail_id                   AS analysisResultDetailId,
+            ard.analysis_result_keywords                    AS analysisResultKeywords,
 --             ard.analysis_result_detail_template_message     AS analysisResultDetailTemplateMessage,
 --             ard.analysis_result_detail_content              AS analysisResultDetailContent,
             ab.analysis_basis_type                          AS analysisBasisType,

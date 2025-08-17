@@ -79,8 +79,9 @@ public class AIAnalysisDTO {
             public static class AnalysisResultDetail {
 
                 private Place place;
-                private String analysisResultDetailTemplateMessage;
+                //private String analysisResultDetailTemplateMessage;
                 private String analysisResultDetailContent;
+                private List<String> analysisResultKeywords;
                 @Builder.Default
                 private List<AnalysisBasis> analysisBasisList = new ArrayList<>();
 

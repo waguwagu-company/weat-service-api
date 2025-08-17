@@ -104,8 +104,9 @@ public class AnalysisAsyncExecutor {
                         AnalysisResultDetail resultDetail = analysisResultDetailRepository.save(
                                 AnalysisResultDetail.builder()
                                         .analysisResult(result)
-                                        .analysisResultDetailTemplateMessage(detail.getAnalysisResultDetailTemplateMessage())
+                                        //.analysisResultDetailTemplateMessage(detail.getAnalysisResultDetailTemplateMessage())
                                         .analysisResultDetailContent(detail.getAnalysisResultDetailContent())
+                                        .analysisResultKeywords(detail.getAnalysisResultKeywords())
                                         .place(place)
                                         .build()
                         );
