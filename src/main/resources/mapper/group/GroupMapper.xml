@@ -6,23 +6,26 @@
 <mapper namespace="com.waguwagu.weat.domain.group.mapper.GroupMapper">
 
     <select id="selectGroupAnalysisBasis" resultType="com.waguwagu.weat.domain.group.model.dto.GroupAnalysisBasisQueryDTO">
-        SELECT
+        SELECT distinct on (p.place_id)
             ard.analysis_result_detail_id                   AS analysisResultDetailId,
-            ard.analysis_result_detail_template_message     AS analysisResultDetailTemplateMessage,
-            ard.analysis_result_detail_content              AS analysisResultDetailContent,
+--             ard.analysis_result_detail_template_message     AS analysisResultDetailTemplateMessage,
+--             ard.analysis_result_detail_content              AS analysisResultDetailContent,
             ab.analysis_basis_type                          AS analysisBasisType,
             ab.analysis_basis_content                       AS analysisBasisContent,
             ab.analysis_score                               AS analysisScore,
             p.place_id                                      AS placeId,
             p.place_name                                    AS placeName,
-            p.place_roadname_address                        AS placeRoadnameAddress
+            p.place_roadname_address                        AS placeRoadnameAddress,
+            pi.place_image_url                              AS placeImageUrl
         FROM "group" g
                  JOIN analysis_result ar ON g.group_id = ar.group_id
                  JOIN analysis_result_detail ard ON ar.analysis_result_id = ard.analysis_result_id
                  JOIN analysis_basis ab ON ard.analysis_result_detail_id = ab.analysis_result_detail_id
                  JOIN place p ON ard.place_id = p.place_id
+                 LEFT JOIN place_image pi ON pi.place_id = p.place_id
         WHERE
             g.group_id = #{groupId}
+        ORDER BY p.place_id, ab.analysis_score desc
     </select>
 
     <select id="selectGroupPlaceImages" resultType="com.waguwagu.weat.domain.group.model.dto.PlaceImageQueryDTO">

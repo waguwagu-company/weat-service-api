@@ -24,18 +24,20 @@ public class GroupResultDetailDTO {
     @Schema(description = "장소 주소")
     private String placeAddress;
 
-    @Schema(description = "분석 결과 템플릿 메시지")
-    private String analysisResultTemplateMessage;
+    @Schema(description = "키워드 목록")
+    private List<String> keywordList;
 
-    @Schema(description = "분석 결과 상세 내용")
-    private String analysisResultContent;
+    @Schema(description = "분석 근거 유형")
+    private String analysisBasisType;
 
-    @Schema(description = "분석 근거 내용 - 리뷰 or AI 추천 멘트")
-    private List<AnalysisBasisDTO> analysisBasisList;
+    @Schema(description = "분석 근거 내용")
+    private String analysisBasisContent;
 
-    @Schema(description = "장소 이미지 목록")
-    @Setter
-    private List<PlaceImageDTO> placeImageList;
+    @Schema(description = "분석 점수")
+    private int analysisScore;
+
+    @Schema(description = "장소 이미지 URL")
+    private String imageUrl;
 
 
 }

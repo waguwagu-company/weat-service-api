@@ -15,10 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -83,44 +80,22 @@ public class GroupService {
 
 
     public GroupResultDTO.Response getGroupResult(String groupId) {
-        List<GroupAnalysisBasisQueryDTO> basisRows = groupMapper.selectGroupAnalysisBasis(groupId);
-        List<PlaceImageQueryDTO> imageRows = groupMapper.selectGroupPlaceImages(groupId);
+        List<GroupAnalysisBasisQueryDTO> queryResults = groupMapper.selectGroupAnalysisBasis(groupId);
 
-        // 이미지 맵 구성 (placeId -> 이미지 리스트)
-        Map<Long, List<PlaceImageDTO>> imageMap = imageRows.stream()
-                .collect(Collectors.groupingBy(
-                        PlaceImageQueryDTO::getPlaceId,
-                        Collectors.mapping(img -> new PlaceImageDTO(img.getPlaceImageUrl()), Collectors.toList())
-                ));
-
-        List<GroupResultDetailDTO> result = basisRows.stream()
-                .collect(Collectors.groupingBy(GroupAnalysisBasisQueryDTO::getPlaceId, LinkedHashMap::new, Collectors.toList()))
-                .values().stream()
-                .map(group -> {
-                    GroupAnalysisBasisQueryDTO first = group.get(0);
-
-                    List<AnalysisBasisDTO> analysisBasisList = group.stream()
-                            .map(g -> AnalysisBasisDTO.builder()
-                                    .analysisBasisContent(g.getAnalysisBasisContent())
-                                    .analysisBasisType(g.getAnalysisBasisType())
-                                    .analysisScore(g.getAnalysisScore())
-                                    .build())
-                            .distinct()
-                            .collect(Collectors.toList());
-
-                    List<PlaceImageDTO> placeImageList = imageMap.getOrDefault(first.getPlaceId(), Collections.emptyList());
-
-                    return GroupResultDetailDTO.builder()
-                            .analysisResultDetailId(first.getAnalysisResultDetailId())
-                            .placeId(first.getPlaceId())
-                            .placeName(first.getPlaceName())
-                            .placeAddress(first.getPlaceRoadnameAddress())
-                            .analysisResultTemplateMessage(first.getAnalysisResultDetailTemplateMessage())
-                            .analysisResultContent(first.getAnalysisResultDetailContent())
-                            .analysisBasisList(analysisBasisList)
-                            .placeImageList(placeImageList)
-                            .build();
-                })
+        // 현재 변경된 기획상 분석 근거 1개, 이미지 1개이므로 placeId 기준 1건만 사용
+        List<GroupResultDetailDTO> result = queryResults.stream()
+                .map(r -> GroupResultDetailDTO.builder()
+                        .analysisResultDetailId(r.getAnalysisResultDetailId())
+                        .placeId(r.getPlaceId())
+                        .placeName(r.getPlaceName())
+                        .placeAddress(r.getPlaceRoadnameAddress())
+                        // TODO: ai server 처리 결정 후 다시 작업
+                        .keywordList(new ArrayList<>())
+                        .analysisBasisType(r.getAnalysisBasisType())
+                        .analysisBasisContent(r.getAnalysisBasisContent())
+                        .analysisScore(r.getAnalysisScore())
+                        .imageUrl(r.getPlaceImageUrl())
+                        .build())
                 .toList();
 
         return new GroupResultDTO.Response(result);
