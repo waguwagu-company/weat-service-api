@@ -1,7 +1,7 @@
 package com.waguwagu.weat.domain.category.controller;
 
 import com.waguwagu.weat.domain.category.model.dto.GetAllCategoryListDTO;
-import com.waguwagu.weat.domain.category.repository.CategoryRepository;
+import com.waguwagu.weat.domain.category.model.dto.GetAllCategoryListLegacyDTO;
 import com.waguwagu.weat.domain.category.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,9 +27,14 @@ public class CategoryController {
             description = "모든 카테고리 리스트 반환",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = GetAllCategoryListDTO.Response.class)
+                    schema = @Schema(implementation = GetAllCategoryListLegacyDTO.Response.class)
             )
     )
+    @GetMapping("legacy")
+    public GetAllCategoryListLegacyDTO.Response getAllCategoryListLegacy() {
+        return categoryService.getAllCategoryListLegacy();
+    }
+
     @GetMapping
     public GetAllCategoryListDTO.Response getAllCategoryList() {
         return categoryService.getAllCategoryList();
