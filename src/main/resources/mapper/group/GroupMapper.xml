@@ -30,21 +30,5 @@
         ORDER BY p.place_id, ab.analysis_score desc
     </select>
 
-    <select id="selectGroupPlaceImages" resultType="com.waguwagu.weat.domain.group.model.dto.PlaceImageQueryDTO">
-        SELECT
-            p.place_id         AS placeId,
-            pi.place_image_url AS placeImageUrl
-        FROM place p
-                 JOIN place_image pi ON p.place_id = pi.place_id
-        WHERE
-            p.place_id IN (
-                SELECT ard.place_id
-                FROM "group" g
-                         JOIN analysis_result ar ON g.group_id = ar.group_id
-                         JOIN analysis_result_detail ard ON ar.analysis_result_id = ard.analysis_result_id
-                WHERE g.group_id = #{groupId}
-            )
-    </select>
-
 
 </mapper>

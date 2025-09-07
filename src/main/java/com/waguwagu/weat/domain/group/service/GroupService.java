@@ -1,10 +1,8 @@
 package com.waguwagu.weat.domain.group.service;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
 import com.waguwagu.weat.domain.analysis.model.entity.AnalysisStatus;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
-import com.waguwagu.weat.domain.common.utils.JsonbUtils;
 import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.mapper.GroupMapper;
@@ -17,8 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -82,7 +79,7 @@ public class GroupService {
 
 
     public GroupResultDTO.Response getGroupResult(String groupId) {
-        List<GroupAnalysisBasisQueryDTO> queryResults = groupMapper.selectGroupAnalysisBasis(groupId);
+        List<GroupAnalysisBasisQueryDTO> queryResults = groupRepository.findGroupAnalysisBasis(groupId);
 
         // 분석 근거 1개, 이미지 1개이므로 placeId 기준 1건만 사용
         List<GroupResultDetailDTO> result = queryResults.stream()
@@ -92,10 +89,7 @@ public class GroupService {
                         .placeName(r.getPlaceName())
                         .placeAddress(r.getPlaceRoadnameAddress())
                         .placeUrl(r.getPlaceUrl())
-                        .keywordList(JsonbUtils.parseOrDefault(
-                                r.getAnalysisResultKeywords(),
-                                new TypeReference<>() {},
-                                List.of()))
+                        .keywordList(r.getAnalysisResultKeywords())
                         .analysisBasisType(r.getAnalysisBasisType())
                         .analysisBasisContent(r.getAnalysisBasisContent())
                         .analysisScore(r.getAnalysisScore())
