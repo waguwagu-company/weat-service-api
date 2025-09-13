@@ -1,6 +1,6 @@
 package com.waguwagu.weat.domain.group.controller;
 
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
+import com.waguwagu.weat.global.model.ResponseDTO;
 import com.waguwagu.weat.domain.group.model.dto.*;
 import com.waguwagu.weat.domain.group.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;

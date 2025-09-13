@@ -2,7 +2,7 @@ package com.waguwagu.weat.domain.admin.controller;
 
 import com.waguwagu.weat.domain.admin.dto.*;
 import com.waguwagu.weat.domain.admin.service.AdminService;
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
+import com.waguwagu.weat.global.model.ResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

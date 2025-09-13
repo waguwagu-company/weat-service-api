@@ -1,6 +1,6 @@
 package com.waguwagu.weat.domain.analysis.model.dto;
 
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
+import com.waguwagu.weat.global.model.ResponseDTO;
 
 public class ValidationDTOResponseWrapper extends ResponseDTO<ValidationDTO.Response> {
 }

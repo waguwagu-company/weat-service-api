@@ -1,9 +1,8 @@
 package com.waguwagu.weat.domain.analysis.controller;
 
-import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.service.AnalysisService;
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
+import com.waguwagu.weat.global.model.ResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;

@@ -4,13 +4,12 @@ import com.waguwagu.weat.domain.analysis.exception.AIServerException;
 import com.waguwagu.weat.domain.analysis.model.dto.AIAnalysisDTO;
 
 import com.waguwagu.weat.domain.analysis.model.dto.ValidationDTO;
-import com.waguwagu.weat.domain.common.dto.AIErrorResponse;
+import com.waguwagu.weat.global.model.AIErrorResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 

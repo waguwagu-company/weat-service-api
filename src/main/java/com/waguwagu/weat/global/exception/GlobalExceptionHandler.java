@@ -1,7 +1,6 @@
 package com.waguwagu.weat.global.exception;
 
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
-import org.springframework.http.HttpStatus;
+import com.waguwagu.weat.global.model.ResponseDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
