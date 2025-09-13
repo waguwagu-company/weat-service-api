@@ -2,7 +2,7 @@ package com.waguwagu.weat.domain.analysis.controller;
 
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.service.AnalysisService;
-import com.waguwagu.weat.global.model.ResponseDTO;
+import com.waguwagu.weat.global.model.Response;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -69,9 +69,9 @@ public class AnalysisController {
             )
     )
     @PostMapping("/settings")
-    public ResponseDTO<SubmitAnalysisSettingDTO.Response> submitAnalysisSetting(
+    public Response<SubmitAnalysisSettingDTO.Response> submitAnalysisSetting(
             @RequestBody SubmitAnalysisSettingDTO.Request requestDto) {
-        return ResponseDTO.of(analysisService.submitAnalysisSetting(requestDto));
+        return Response.of(analysisService.submitAnalysisSetting(requestDto));
     }
 
 
@@ -105,8 +105,8 @@ public class AnalysisController {
             )
     )
     @GetMapping(value = "/settings/status")
-    public ResponseDTO<IsMemberSubmitAnalysisSettingDTO.Response> isMemberSubmitAnalysisSetting(@RequestParam("memberId") Long memberId) {
-        return ResponseDTO.of(analysisService.isMemberSubmitAnalysisSetting(memberId));
+    public Response<IsMemberSubmitAnalysisSettingDTO.Response> isMemberSubmitAnalysisSetting(@RequestParam("memberId") Long memberId) {
+        return Response.of(analysisService.isMemberSubmitAnalysisSetting(memberId));
     }
 
     @Operation(summary = "분석 상태 조회", description =
@@ -143,8 +143,8 @@ public class AnalysisController {
             )
     )
     @GetMapping("/status")
-    public ResponseDTO<GetAnalysisStatusDTO.Response> getAnalysisStatus(@RequestParam("groupId") String groupId) {
-        return ResponseDTO.of(analysisService.getAnalysisStatus(groupId));
+    public Response<GetAnalysisStatusDTO.Response> getAnalysisStatus(@RequestParam("groupId") String groupId) {
+        return Response.of(analysisService.getAnalysisStatus(groupId));
     }
 
     // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
@@ -215,8 +215,8 @@ public class AnalysisController {
             )
     )
     @PostMapping
-    public ResponseDTO<AnalysisStartDTO.Response> analysisStart(@RequestBody AnalysisStartDTO.Request request) {
-        return ResponseDTO.of(analysisService.analysisStart(request));
+    public Response<AnalysisStartDTO.Response> analysisStart(@RequestBody AnalysisStartDTO.Request request) {
+        return Response.of(analysisService.analysisStart(request));
     }
 
 
@@ -250,9 +250,9 @@ public class AnalysisController {
             )
     )
     @PostMapping("/validation/input")
-    public Mono<ResponseDTO<ValidationDTO.Response>> validateInput(@RequestBody ValidationDTO.Request request) {
+    public Mono<Response<ValidationDTO.Response>> validateInput(@RequestBody ValidationDTO.Request request) {
         return analysisService.validateInput(request)
-                .map(ResponseDTO::of);
+                .map(Response::of);
     }
 
     @Operation(summary = "분석결과상세(장소)별 좋아요 토글", description = "분석결과의 각 장소에 대해 좋아요를 활성화 또는 비활성화한다.")
@@ -265,8 +265,8 @@ public class AnalysisController {
             )
     )
     @PostMapping("/likes")
-    public ResponseDTO<ToggleAnalysisResultDetailLikeDTO.Response> toggleAnalysisDetail(@RequestBody ToggleAnalysisResultDetailLikeDTO.Request request) {
-        return ResponseDTO.of(analysisService.toggleAnalysisResultDetailLike(request));
+    public Response<ToggleAnalysisResultDetailLikeDTO.Response> toggleAnalysisDetail(@RequestBody ToggleAnalysisResultDetailLikeDTO.Request request) {
+        return Response.of(analysisService.toggleAnalysisResultDetailLike(request));
     }
 
     @Operation(summary = "분석결과상세(장소)별 좋아요 개수 조회", description = "분석결과의 각 장소에 대한 좋아요 개수를 조회한다.")
@@ -279,8 +279,8 @@ public class AnalysisController {
             )
     )
     @GetMapping("/likes")
-    public ResponseDTO<GetAnalysisResultLikeCountDTO.Response> getAnalysisDetailLikeCount(@RequestParam("analysisDetailId") Long analysisDetailId) {
-        return ResponseDTO.of(analysisService.getAnalysisResultLikeCount(analysisDetailId));
+    public Response<GetAnalysisResultLikeCountDTO.Response> getAnalysisDetailLikeCount(@RequestParam("analysisDetailId") Long analysisDetailId) {
+        return Response.of(analysisService.getAnalysisResultLikeCount(analysisDetailId));
     }
 
 
@@ -297,10 +297,10 @@ public class AnalysisController {
             )
     )
     @GetMapping("/likes/status")
-    public ResponseDTO<GetAnalysisResultLikeStatusByDetailDTO.Response> getAnalysisResultLikeStatusByDetail(
+    public Response<GetAnalysisResultLikeStatusByDetailDTO.Response> getAnalysisResultLikeStatusByDetail(
             @RequestParam("analysisResultDetailId") Long analysisDetailId,
             @RequestParam("memberId") Long memberId) {
-        return ResponseDTO.of(analysisService.getAnalysisResultLikeStatusByDetail(analysisDetailId, memberId));
+        return Response.of(analysisService.getAnalysisResultLikeStatusByDetail(analysisDetailId, memberId));
     }
 
 

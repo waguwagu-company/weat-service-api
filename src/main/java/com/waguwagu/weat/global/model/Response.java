@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Schema(description = "공통 응답 DTO")
-public class ResponseDTO<T> {
+public class Response<T> {
 
     @Schema(description = "응답 코드", example = "SUCCESS")
     private String code;
@@ -21,30 +21,30 @@ public class ResponseDTO<T> {
     @Schema(description = "응답 데이터")
     private T data;
 
-    public ResponseDTO<T> code(String code) {
+    public Response<T> code(String code) {
         this.code = code;
         return this;
     }
 
-    public ResponseDTO<T> message(String message) {
+    public Response<T> message(String message) {
         this.message = message;
         return this;
     }
 
-    public ResponseDTO<T> data(T data) {
+    public Response<T> data(T data) {
         this.data = data;
         return this;
     }
 
-    public static <T> ResponseDTO<T> of(T data) {
-        return new ResponseDTO<T>()
+    public static <T> Response<T> of(T data) {
+        return new Response<T>()
                 .code(ErrorCode.SUCCESS.getCode())
                 .message(ErrorCode.SUCCESS.getMessage())
                 .data(data);
     }
 
-    public static <T> ResponseDTO<T> fail(String code, String message) {
-        return new ResponseDTO<T>()
+    public static <T> Response<T> fail(String code, String message) {
+        return new Response<T>()
                 .code(code)
                 .message(message)
                 .data(null);
