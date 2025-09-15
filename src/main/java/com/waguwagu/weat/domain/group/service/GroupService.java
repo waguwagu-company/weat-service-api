@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
 import com.waguwagu.weat.domain.analysis.model.entity.AnalysisStatus;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
-import com.waguwagu.weat.domain.common.utils.JsonbUtils;
+import com.waguwagu.weat.global.utils.JsonbUtils;
 import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.mapper.GroupMapper;
@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

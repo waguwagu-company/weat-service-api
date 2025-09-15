@@ -1,4 +1,4 @@
-package com.waguwagu.weat.domain.common.dto;
+package com.waguwagu.weat.global.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
