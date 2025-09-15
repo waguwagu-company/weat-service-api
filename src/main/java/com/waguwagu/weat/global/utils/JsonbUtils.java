@@ -1,4 +1,4 @@
-package com.waguwagu.weat.domain.common.utils;
+package com.waguwagu.weat.global.utils;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

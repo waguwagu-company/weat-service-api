@@ -1,6 +1,6 @@
 package com.waguwagu.weat.domain.group.controller;
 
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
+import com.waguwagu.weat.global.model.Response;
 import com.waguwagu.weat.domain.group.model.dto.*;
 import com.waguwagu.weat.domain.group.service.GroupService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,8 +30,8 @@ public class GroupController {
             )
     )
     @PostMapping
-    public ResponseDTO<CreateGroupDTO.Response> createGroup(@RequestBody CreateGroupDTO.Request request) {
-        return ResponseDTO.of(groupService.createGroup(request));
+    public Response<CreateGroupDTO.Response> createGroup(@RequestBody CreateGroupDTO.Request request) {
+        return Response.of(groupService.createGroup(request));
     }
 
     @Operation(summary = "그룹 참여", description = "생성된 그룹에 참여합니다.")
@@ -64,8 +64,8 @@ public class GroupController {
             )
     )
     @PostMapping("/{groupId}/members")
-    public ResponseDTO<JoinGroupDTO.Response> joinGroup(@PathVariable("groupId") String groupId) {
-        return ResponseDTO.of(groupService.joinGroup(groupId));
+    public Response<JoinGroupDTO.Response> joinGroup(@PathVariable("groupId") String groupId) {
+        return Response.of(groupService.joinGroup(groupId));
     }
 
 
@@ -99,7 +99,7 @@ public class GroupController {
             )
     )
     @PostMapping("/{groupId}/result")
-    public ResponseDTO<GroupResultDTO.Response> getGroupResult(@PathVariable("groupId") String groupId) {
-        return ResponseDTO.of(groupService.getGroupResult(groupId));
+    public Response<GroupResultDTO.Response> getGroupResult(@PathVariable("groupId") String groupId) {
+        return Response.of(groupService.getGroupResult(groupId));
     }
 }

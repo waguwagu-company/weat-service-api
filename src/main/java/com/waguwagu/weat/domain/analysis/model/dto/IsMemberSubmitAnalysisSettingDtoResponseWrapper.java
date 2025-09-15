@@ -1,9 +1,8 @@
 package com.waguwagu.weat.domain.analysis.model.dto;
 
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
+import com.waguwagu.weat.global.model.Response;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-public class IsMemberSubmitAnalysisSettingDtoResponseWrapper extends ResponseDTO<IsMemberSubmitAnalysisSettingDTO.Response> {
+public class IsMemberSubmitAnalysisSettingDtoResponseWrapper extends Response<IsMemberSubmitAnalysisSettingDTO.Response> {
 }
