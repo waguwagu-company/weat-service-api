@@ -1,0 +1,1 @@
+INSERT INTO "group"(group_id) VALUES ('group-123');
