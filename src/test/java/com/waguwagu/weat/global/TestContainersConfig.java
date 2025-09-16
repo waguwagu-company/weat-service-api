@@ -15,14 +15,22 @@ import org.testcontainers.containers.PostgreSQLContainer;
  */
 @TestConfiguration
 public class TestContainersConfig {
+
+    /**
+     * static 필드로 선언하여 한 번만 컨테이너를 띄우고 여러 테스트 간에 같은 컨테이너 재사용.
+     * @Transactional, @DirtiesContext 등을 통해 상태 관리 필요
+     */
+    private static final PostgreSQLContainer<?> POSTGRES =
+            new PostgreSQLContainer<>("postgres:16-alpine")
+                    .withDatabaseName("testdb")
+                    .withUsername("test")
+                    .withPassword("test")
+                    .withReuse(true);
+
     @Bean
     @ServiceConnection
     public PostgreSQLContainer<?> postgresContainer() {
-        return new PostgreSQLContainer<>("postgres:16-alpine")
-                .withDatabaseName("testdb")
-                .withUsername("test")
-                .withPassword("test")
-                .withReuse(true);
+        return POSTGRES;
     }
 
 }
