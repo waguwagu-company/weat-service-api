@@ -1,0 +1,23 @@
+version: '3.8'
+
+name: weat-local
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile-local
+    container_name: weat-service-api
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    networks:
+      - weat-network
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+
+networks:
+  weat-network:
+    driver: bridge
