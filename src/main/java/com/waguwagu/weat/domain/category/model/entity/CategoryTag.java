@@ -23,6 +23,10 @@ public class CategoryTag {
     @Comment("카테고리 태그명")
     private String categoryTagName;
 
+    @Column(name = "category_tag_version")
+    @Comment("카테고리 태그버전")
+    private String categoryTagVersion;
+
     @Column(name = "category_tag_order")
     @Comment("카테고리 태그순서")
     private Long categoryTagOrder;
