@@ -1,6 +1,6 @@
 package com.waguwagu.weat.domain.analysis.repository;
 
-import com.waguwagu.weat.domain.analysis.model.dto.MemberAnalysisSettingDto;
+import com.waguwagu.weat.domain.analysis.model.dto.MemberAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.category.model.entity.Category;
 import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
@@ -257,7 +257,7 @@ class AnalysisSettingRepositoryImplTest {
                 );
 
                 // when
-                final List<MemberAnalysisSettingDto> results =
+                final List<MemberAnalysisSettingDTO> results =
                         analysisSettingRepositoryImpl.findMemberAnalysisSettingsByGroupId(testGroup.getGroupId());
 
                 // then
@@ -265,16 +265,16 @@ class AnalysisSettingRepositoryImplTest {
                 assertThat(results).hasSize(3);
 
                 // member1 검증 (기본 필드)
-                MemberAnalysisSettingDto member1AnalysisSettingDto = results.stream()
+                MemberAnalysisSettingDTO member1AnalysisSettingDto = results.stream()
                         .filter(dto -> dto.getMemberId().equals(givenMember1.getMemberId()))
                         .findFirst().orElseThrow();
 
                 assertThat(member1AnalysisSettingDto)
                         .extracting(
-                                MemberAnalysisSettingDto::getXPosition,
-                                MemberAnalysisSettingDto::getYPosition,
-                                MemberAnalysisSettingDto::getRoadnameAddress,
-                                MemberAnalysisSettingDto::getInputText
+                                MemberAnalysisSettingDTO::getXPosition,
+                                MemberAnalysisSettingDTO::getYPosition,
+                                MemberAnalysisSettingDTO::getRoadnameAddress,
+                                MemberAnalysisSettingDTO::getInputText
                         )
                         .containsExactly(
                                 givenMember1XPosition,
@@ -287,11 +287,11 @@ class AnalysisSettingRepositoryImplTest {
                 assertThat(member1AnalysisSettingDto.getCategorySettings())
                         .hasSize(2)
                         .extracting(
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryId,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryName,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryTagId,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryTagName,
-                                MemberAnalysisSettingDto.CategorySettingDto::getIsPreferred
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryId,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryName,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryTagId,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryTagName,
+                                MemberAnalysisSettingDTO.CategorySetting::getIsPreferred
                         )
                         .containsExactlyInAnyOrder(
                                 tuple(
@@ -311,16 +311,16 @@ class AnalysisSettingRepositoryImplTest {
                         );
 
                 // member2 검증
-                MemberAnalysisSettingDto member2AnalysisSettingDto = results.stream()
+                MemberAnalysisSettingDTO member2AnalysisSettingDto = results.stream()
                         .filter(dto -> dto.getMemberId().equals(givenMember2.getMemberId()))
                         .findFirst().orElseThrow();
 
                 assertThat(member2AnalysisSettingDto)
                         .extracting(
-                                MemberAnalysisSettingDto::getXPosition,
-                                MemberAnalysisSettingDto::getYPosition,
-                                MemberAnalysisSettingDto::getRoadnameAddress,
-                                MemberAnalysisSettingDto::getInputText
+                                MemberAnalysisSettingDTO::getXPosition,
+                                MemberAnalysisSettingDTO::getYPosition,
+                                MemberAnalysisSettingDTO::getRoadnameAddress,
+                                MemberAnalysisSettingDTO::getInputText
                         )
                         .containsExactly(
                                 givenMember2XPosition,
@@ -332,11 +332,11 @@ class AnalysisSettingRepositoryImplTest {
                 assertThat(member2AnalysisSettingDto.getCategorySettings())
                         .hasSize(1)
                         .extracting(
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryId,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryName,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryTagId,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryTagName,
-                                MemberAnalysisSettingDto.CategorySettingDto::getIsPreferred
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryId,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryName,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryTagId,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryTagName,
+                                MemberAnalysisSettingDTO.CategorySetting::getIsPreferred
                         )
                         .containsExactly(tuple(
                                 givenMember2Category.getCategoryId(),
@@ -347,16 +347,16 @@ class AnalysisSettingRepositoryImplTest {
                         ));
 
                 // member3 검증
-                MemberAnalysisSettingDto member3AnalysisSettingDto = results.stream()
+                MemberAnalysisSettingDTO member3AnalysisSettingDto = results.stream()
                         .filter(dto -> dto.getMemberId().equals(givenMember3.getMemberId()))
                         .findFirst().orElseThrow();
 
                 assertThat(member3AnalysisSettingDto)
                         .extracting(
-                                MemberAnalysisSettingDto::getXPosition,
-                                MemberAnalysisSettingDto::getYPosition,
-                                MemberAnalysisSettingDto::getRoadnameAddress,
-                                MemberAnalysisSettingDto::getInputText
+                                MemberAnalysisSettingDTO::getXPosition,
+                                MemberAnalysisSettingDTO::getYPosition,
+                                MemberAnalysisSettingDTO::getRoadnameAddress,
+                                MemberAnalysisSettingDTO::getInputText
                         )
                         .containsExactly(
                                 givenMember3XPosition,
@@ -368,11 +368,11 @@ class AnalysisSettingRepositoryImplTest {
                 assertThat(member3AnalysisSettingDto.getCategorySettings())
                         .hasSize(1)
                         .extracting(
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryId,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryName,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryTagId,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryTagName,
-                                MemberAnalysisSettingDto.CategorySettingDto::getIsPreferred
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryId,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryName,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryTagId,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryTagName,
+                                MemberAnalysisSettingDTO.CategorySetting::getIsPreferred
                         )
                         .containsExactly(tuple(
                                 givenMember3Category.getCategoryId(),
@@ -421,14 +421,14 @@ class AnalysisSettingRepositoryImplTest {
                         givenMember2IsPreferred);
 
                 // when
-                final List<MemberAnalysisSettingDto> results = analysisSettingRepositoryImpl
+                final List<MemberAnalysisSettingDTO> results = analysisSettingRepositoryImpl
                         .findMemberAnalysisSettingsByGroupId(testGroup.getGroupId());
 
                 // then
                 assertThat(results)
                         .isNotNull()
                         .hasSize(2)
-                        .extracting(MemberAnalysisSettingDto::getMemberId)
+                        .extracting(MemberAnalysisSettingDTO::getMemberId)
                         .containsExactlyInAnyOrder(
                                 givenMember1.getMemberId(),
                                 givenMember2.getMemberId()
@@ -443,7 +443,7 @@ class AnalysisSettingRepositoryImplTest {
                 final String groupId = "non-existent-group-id";
 
                 // when
-                final List<MemberAnalysisSettingDto> results = analysisSettingRepositoryImpl
+                final List<MemberAnalysisSettingDTO> results = analysisSettingRepositoryImpl
                         .findMemberAnalysisSettingsByGroupId(groupId);
 
                 // then
@@ -473,20 +473,20 @@ class AnalysisSettingRepositoryImplTest {
                         givenMember1IsPreferred);
 
                 // when
-                final List<MemberAnalysisSettingDto> results = analysisSettingRepositoryImpl
+                final List<MemberAnalysisSettingDTO> results = analysisSettingRepositoryImpl
                         .findMemberAnalysisSettingsByGroupId(testGroup.getGroupId());
 
                 // then
                 assertThat(results).hasSize(1);
 
-                MemberAnalysisSettingDto member1AnalysisSettingDto = results.get(0);
+                MemberAnalysisSettingDTO member1AnalysisSettingDto = results.get(0);
                 assertThat(member1AnalysisSettingDto)
                         .extracting(
-                                MemberAnalysisSettingDto::getMemberId,
-                                MemberAnalysisSettingDto::getXPosition,
-                                MemberAnalysisSettingDto::getYPosition,
-                                MemberAnalysisSettingDto::getRoadnameAddress,
-                                MemberAnalysisSettingDto::getInputText
+                                MemberAnalysisSettingDTO::getMemberId,
+                                MemberAnalysisSettingDTO::getXPosition,
+                                MemberAnalysisSettingDTO::getYPosition,
+                                MemberAnalysisSettingDTO::getRoadnameAddress,
+                                MemberAnalysisSettingDTO::getInputText
                         )
                         .containsExactly(
                                 givenMember1.getMemberId(),
@@ -499,11 +499,11 @@ class AnalysisSettingRepositoryImplTest {
                 assertThat(member1AnalysisSettingDto.getCategorySettings())
                         .hasSize(1)
                         .extracting(
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryId,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryName,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryTagId,
-                                MemberAnalysisSettingDto.CategorySettingDto::getCategoryTagName,
-                                MemberAnalysisSettingDto.CategorySettingDto::getIsPreferred
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryId,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryName,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryTagId,
+                                MemberAnalysisSettingDTO.CategorySetting::getCategoryTagName,
+                                MemberAnalysisSettingDTO.CategorySetting::getIsPreferred
                         )
                         .containsExactly(
                                 tuple(

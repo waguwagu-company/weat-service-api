@@ -2,7 +2,7 @@ package com.waguwagu.weat.domain.analysis.repository;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.waguwagu.weat.domain.analysis.model.dto.MemberAnalysisSettingDto;
+import com.waguwagu.weat.domain.analysis.model.dto.MemberAnalysisSettingDTO;
 import com.waguwagu.weat.domain.analysis.model.entity.QAnalysisSetting;
 import com.waguwagu.weat.domain.analysis.model.entity.QCategorySetting;
 import com.waguwagu.weat.domain.analysis.model.entity.QLocationSetting;
@@ -12,7 +12,6 @@ import com.waguwagu.weat.domain.category.model.entity.QCategoryTag;
 import com.waguwagu.weat.domain.group.model.entity.QMember;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -28,7 +27,7 @@ public class AnalysisSettingRepositoryImpl implements AnalysisSettingRepositoryC
      * @apiNote 위치 설정과 카테고리 설정은 필수 제출 항목이며, 비정형 입력 설정은 선택 항목임에 주의
      */
     @Override
-    public List<MemberAnalysisSettingDto> findMemberAnalysisSettingsByGroupId(String groupId) {
+    public List<MemberAnalysisSettingDTO> findMemberAnalysisSettingsByGroupId(String groupId) {
 
         Objects.requireNonNull(groupId, "groupId must not be null");
 
@@ -61,13 +60,13 @@ public class AnalysisSettingRepositoryImpl implements AnalysisSettingRepositoryC
                 .where(m.group.groupId.eq(groupId))
                 .fetch();
 
-        Map<Long, MemberAnalysisSettingDto> memberMap = new HashMap<>();
+        Map<Long, MemberAnalysisSettingDTO> memberMap = new HashMap<>();
 
         for (Tuple result : results) {
             Long memberId = result.get(m.memberId);
 
             memberMap.computeIfAbsent(memberId, id ->
-                    MemberAnalysisSettingDto.builder()
+                    MemberAnalysisSettingDTO.builder()
                             .memberId(id)
                             .xPosition(result.get(ls.xPosition))
                             .yPosition(result.get(ls.yPosition))
@@ -78,7 +77,7 @@ public class AnalysisSettingRepositoryImpl implements AnalysisSettingRepositoryC
             );
 
             memberMap.get(memberId).getCategorySettings().add(
-                    MemberAnalysisSettingDto.CategorySettingDto.builder()
+                    MemberAnalysisSettingDTO.CategorySetting.builder()
                             .categoryId(result.get(c.categoryId))
                             .categoryName(result.get(c.categoryName))
                             .categoryTagId(result.get(ct.categoryTagId))

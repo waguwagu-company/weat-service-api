@@ -1,29 +1,26 @@
 package com.waguwagu.weat.domain.analysis.model.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Getter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
-public class MemberAnalysisSettingDto {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+public class MemberAnalysisSettingDTO {
     private Long memberId;
     private Double xPosition;
     private Double yPosition;
     private String roadnameAddress;
     private String inputText;
-    private List<CategorySettingDto> categorySettings;
+    private List<CategorySetting> categorySettings;
 
     @Getter
     @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class CategorySettingDto {
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class CategorySetting {
         private Long categoryId;
         private String categoryName;
         private Long categoryTagId;

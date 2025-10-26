@@ -5,9 +5,7 @@ import com.waguwagu.weat.domain.analysis.exception.*;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
-import com.waguwagu.weat.domain.category.exception.CategoryNotFoundException;
 import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
-import com.waguwagu.weat.domain.category.model.entity.Category;
 import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
 import com.waguwagu.weat.domain.category.repository.CategoryRepository;
 import com.waguwagu.weat.domain.category.repository.CategoryTagRepository;
@@ -24,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -198,7 +195,7 @@ public class AnalysisService {
         analysis.setAnalysisStatus(AnalysisStatus.IN_PROGRESS);
 
         // 그룹에 속한 멤버들의 분석 설정 일괄 조회
-        List<MemberAnalysisSettingDto> groupMemberSettings =
+        List<MemberAnalysisSettingDTO> groupMemberSettings =
                 analysisSettingRepository.findMemberAnalysisSettingsByGroupId(groupId);
 
         // AI 분석 시작 요청에 사용되는 객체로 변환
