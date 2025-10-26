@@ -14,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -31,8 +28,10 @@ public class AnalysisSettingRepositoryImpl implements AnalysisSettingRepositoryC
      * @apiNote 위치 설정과 카테고리 설정은 필수 제출 항목이며, 비정형 입력 설정은 선택 항목임에 주의
      */
     @Override
-    @Transactional(readOnly = true)
     public List<MemberAnalysisSettingDto> findMemberAnalysisSettingsByGroupId(String groupId) {
+
+        Objects.requireNonNull(groupId, "groupId must not be null");
+
         QMember m = QMember.member;
         QAnalysisSetting as = QAnalysisSetting.analysisSetting;
         QLocationSetting ls = QLocationSetting.locationSetting;
@@ -59,7 +58,7 @@ public class AnalysisSettingRepositoryImpl implements AnalysisSettingRepositoryC
                 .leftJoin(ts).on(ts.analysisSetting.eq(as))
                 .join(c).on(cs.category.eq(c))
                 .join(ct).on(cs.categoryTag.eq(ct))
-                .where(groupId != null ? m.group.groupId.eq(groupId) : null)
+                .where(m.group.groupId.eq(groupId))
                 .fetch();
 
         Map<Long, MemberAnalysisSettingDto> memberMap = new HashMap<>();

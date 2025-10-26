@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @ActiveProfiles("test")
@@ -437,13 +439,17 @@ class AnalysisSettingRepositoryImplTest {
             @Test
             @DisplayName("존재하지 않는 그룹 식별자로 조회하면 빈 리스트가 반환되어야 한다.")
             void findMemberAnalysisSettingsByGroupId_success_tc_03() {
+                // given
+                final String groupId = "non-existent-group-id";
+
                 // when
                 final List<MemberAnalysisSettingDto> results = analysisSettingRepositoryImpl
-                        .findMemberAnalysisSettingsByGroupId("non-existent-group-id");
+                        .findMemberAnalysisSettingsByGroupId(groupId);
 
                 // then
-                assertThat(results).isNotNull();
-                assertThat(results).isEmpty();
+                assertThat(results)
+                            .isNotNull()
+                        .isEmpty();
             }
 
             @Test
@@ -509,31 +515,23 @@ class AnalysisSettingRepositoryImplTest {
                                 )
                         );
             }
+        }
+
+        @Nested
+        @DisplayName("EXCEPTION")
+        class Exception {
 
             @Test
-            @DisplayName("그룹 식별자를 null로 조회한 경우 빈 리스트가 반환되어야 한다.")
-            void findMemberAnalysisSettingsByGroupId_success_tc_05() {
-                // when
-                final List<MemberAnalysisSettingDto> results = analysisSettingRepositoryImpl
-                        .findMemberAnalysisSettingsByGroupId(null);
+            @DisplayName("그룹 식별자가 null인 경우 NullPointerException이 발생해야 한다.")
+            void findMemberAnalysisSettingsByGroupId_exception_tc_01() {
+                // given
+                final String groupId = null;
 
-                // then
-                assertThat(results)
-                        .isNotNull()
-                        .isEmpty();
-            }
-
-            @Test
-            @DisplayName("그룹 식별자를 빈문자열로 조회하면 빈 리스트가 반환되어야 한다.")
-            void findMemberAnalysisSettingsByGroupId_success_tc_06() {
-                // when
-                final List<MemberAnalysisSettingDto> results = analysisSettingRepositoryImpl
-                        .findMemberAnalysisSettingsByGroupId("");
-
-                // then
-                assertThat(results)
-                        .isNotNull()
-                        .isEmpty();
+                // when & then
+                assertThrows(
+                        NullPointerException.class,
+                        () -> analysisSettingRepositoryImpl.findMemberAnalysisSettingsByGroupId(groupId)
+                );
             }
         }
     }
