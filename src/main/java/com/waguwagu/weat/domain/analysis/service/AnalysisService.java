@@ -5,9 +5,7 @@ import com.waguwagu.weat.domain.analysis.exception.*;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.repository.*;
-import com.waguwagu.weat.domain.category.exception.CategoryNotFoundException;
 import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
-import com.waguwagu.weat.domain.category.model.entity.Category;
 import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
 import com.waguwagu.weat.domain.category.repository.CategoryRepository;
 import com.waguwagu.weat.domain.category.repository.CategoryTagRepository;
@@ -24,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -197,57 +194,29 @@ public class AnalysisService {
         // 진행중이지 않다면, "진행중" 상태로 변경
         analysis.setAnalysisStatus(AnalysisStatus.IN_PROGRESS);
 
-        // 그룹 내의 모든 멤버 조회
-        List<Member> groupMemberList = memberRepository.findAllByGroupGroupId(group.getGroupId());
+        // 그룹에 속한 멤버들의 분석 설정 일괄 조회
+        List<MemberAnalysisSettingDTO> groupMemberSettings =
+                analysisSettingRepository.findMemberAnalysisSettingsByGroupId(groupId);
 
-        List<AIAnalysisDTO.Request.MemberSetting> memberSettingList = new ArrayList<>();
-
-
-        // 각 멤버별 설정 값 조회
-        for (Member groupMember : groupMemberList) {
-            // 그룹 멤버중에 설정을 제출하지 않은 멤버는 제외
-            if (!this.isMemberSubmitAnalysisSetting(groupMember.getMemberId()).isSubmitted()) {
-                continue;
-            }
-
-            // 위치 설정
-            LocationSetting locationSetting =
-                    locationSettingRepository.findByMemberId(groupMember.getMemberId())
-                            .orElseThrow(() -> new LocationSettingNotFoundForMemberIdException(groupMember.getMemberId()));
-
-            // 카테고리 설정
-            List<CategorySetting> categorySettingList = categorySettingRepository.findAllByMemberId(groupMember.getMemberId());
-
-            List<AIAnalysisDTO.Request.MemberSetting.CategorySetting> memberSettingCategoryList = new ArrayList<>();
-
-            for (CategorySetting categorySetting : categorySettingList) {
-                memberSettingCategoryList.add(
-                        AIAnalysisDTO.Request.MemberSetting.CategorySetting.builder()
-                                .categoryId(categorySetting.getCategory().getCategoryId())
-                                .categoryName(categorySetting.getCategory().getCategoryName())
-                                .categoryTagId(categorySetting.getCategoryTag().getCategoryTagId())
-                                .categoryTagName(categorySetting.getCategoryTag().getCategoryTagName())
-                                .isPreferred(categorySetting.getIsPreferred())
-                                .build()
-                );
-            }
-
-            // 입력 설정
-            TextInputSetting textInputSetting = textInputSettingRepository.findByMemberId(groupMember.getMemberId());
-
-            AIAnalysisDTO.Request.MemberSetting memberSetting =
-                    AIAnalysisDTO.Request.MemberSetting.builder()
-                            .memberId(groupMember.getMemberId())
-                            .xPosition(locationSetting.getXPosition())
-                            .yPosition(locationSetting.getYPosition())
-                            .roadnameAddress(locationSetting.getRoadnameAddress())
-                            .categoryList(memberSettingCategoryList)
-                            .inputText(textInputSetting.getInputText())
-                            .build();
-
-            memberSettingList.add(memberSetting);
-        }
-
+        // AI 분석 시작 요청에 사용되는 객체로 변환
+        List<AIAnalysisDTO.Request.MemberSetting> memberSettingList = groupMemberSettings.stream()
+                .map(dto -> AIAnalysisDTO.Request.MemberSetting.builder()
+                        .memberId(dto.getMemberId())
+                        .xPosition(dto.getXPosition())
+                        .yPosition(dto.getYPosition())
+                        .roadnameAddress(dto.getRoadnameAddress())
+                        .inputText(dto.getInputText()) // null이어도 그대로 전달
+                        .categoryList(dto.getCategorySettings().stream()
+                                .map(c -> AIAnalysisDTO.Request.MemberSetting.CategorySetting.builder()
+                                        .categoryId(c.getCategoryId())
+                                        .categoryName(c.getCategoryName())
+                                        .categoryTagId(c.getCategoryTagId())
+                                        .categoryTagName(c.getCategoryTagName())
+                                        .isPreferred(c.getIsPreferred())
+                                        .build())
+                                .toList())
+                        .build())
+                .toList();
 
         // 비동기로 AI 분석서비스에 분석 요청
         analysisAsyncExecutor.startAnalysisAsync(AIAnalysisDTO.Request.builder()
