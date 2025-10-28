@@ -8,9 +8,11 @@ import com.waguwagu.weat.domain.analysis.model.entity.AnalysisSetting;
 import java.util.List;
 import java.util.Optional;
 
-public interface AnalysisSettingRepository extends JpaRepository<AnalysisSetting, Long> {
+public interface AnalysisSettingRepository extends JpaRepository<AnalysisSetting, Long>, AnalysisSettingRepositoryCustom {
     Boolean existsByMemberMemberId(Long memberId);
+
     Optional<AnalysisSetting> findByMember(Member member);
+
     Long countByAnalysis(Analysis analysis);
 
     List<AnalysisSetting> findAllByMember(Member member);

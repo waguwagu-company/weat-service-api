@@ -3,6 +3,7 @@ name: CI/CD for weat-service-api
 on:
   push:
     branches: [ "main", "develop" ]
+  workflow_dispatch:   
 
 jobs:
   deploy:
