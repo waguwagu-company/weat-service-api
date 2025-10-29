@@ -1,6 +1,7 @@
 package com.waguwagu.weat.domain.analysis.service;
 
 import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
+import com.waguwagu.weat.domain.analysis.event.AnalysisStartEvent;
 import com.waguwagu.weat.domain.analysis.exception.*;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
@@ -17,6 +18,7 @@ import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -45,7 +47,7 @@ public class AnalysisService {
     private final CategoryTagRepository categoryTagRepository;
     private final AnalysisResultLikeRepository analysisResultLikeRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
-
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${ai.service.uri.validation}")
     private String validationUri;
@@ -218,12 +220,12 @@ public class AnalysisService {
                         .build())
                 .toList();
 
-        // 비동기로 AI 분석서비스에 분석 요청
-        analysisAsyncExecutor.startAnalysisAsync(AIAnalysisDTO.Request.builder()
-                .groupId(group.getGroupId())
-                .analysisId(analysis.getAnalysisId())
-                .memberSettingList(memberSettingList)
-                .build());
+        // 트랜잭션 커밋 이후 AI 분석 요청
+        eventPublisher.publishEvent(new AnalysisStartEvent(
+                group.getGroupId(),
+                analysis.getAnalysisId(),
+                memberSettingList
+        ));
 
         return AnalysisStartDTO.Response.builder()
                 .groupId(group.getGroupId())
