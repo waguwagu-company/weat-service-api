@@ -448,7 +448,7 @@ class AnalysisSettingRepositoryImplTest {
 
                 // then
                 assertThat(results)
-                            .isNotNull()
+                        .isNotNull()
                         .isEmpty();
             }
 
@@ -531,6 +531,122 @@ class AnalysisSettingRepositoryImplTest {
                 assertThrows(
                         NullPointerException.class,
                         () -> analysisSettingRepositoryImpl.findMemberAnalysisSettingsByGroupId(groupId)
+                );
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("countAnalysisSettingByGroupId - 그룹식별자로 그룹내에 제출된 분석 설정 개수 조회")
+    class CountAnalysisSettingByGroupId {
+        @Nested
+        @DisplayName("SUCCESS")
+        class Success {
+            @Test
+            @DisplayName("그룹내에 제출된 설정 개수와 동일한 개수가 조회되어야 한다.")
+            void countAnalysisSettingByGroupId_success_tc_01() {
+                // given
+                final Member givenMember1 = testMemberList.get(0);
+                final Member givenMember2 = testMemberList.get(1);
+                final Member givenMember3 = testMemberList.get(2);
+
+                final List<Member> givenMemberList = List.of(
+                        givenMember1, givenMember2, givenMember3
+                );
+
+                // member1 설정
+                final double givenMember1XPosition = 127.0123;
+                final double givenMember1YPosition = 37.1234;
+                final String givenMember1RoadnameAddress = "서울시 강남구 테헤란로 123";
+                final String givenMember1InputText = "맛있는 한식집을 찾고 있어요";
+
+                final Category givenMember1Category1 = testCategoryList.get(0);
+                final CategoryTag givenMember1CategoryTag1 = testCategoryTagList.get(0);
+                final boolean givenMember1IsPreferredForCategoryTag1 = true;
+
+                final Category givenMember1Category2 = testCategoryList.get(1);
+                final CategoryTag givenMember1CategoryTag2 = testCategoryTagList.get(2);
+                final boolean givenMember1IsPreferredForCategoryTag2 = false;
+
+                initMemberSettings(
+                        givenMember1,
+                        givenMember1XPosition, givenMember1YPosition,
+                        givenMember1RoadnameAddress, givenMember1InputText,
+                        List.of(
+                                new CategoryPreferredSetting(givenMember1Category1, givenMember1CategoryTag1, givenMember1IsPreferredForCategoryTag1),
+                                new CategoryPreferredSetting(givenMember1Category2, givenMember1CategoryTag2, givenMember1IsPreferredForCategoryTag2)
+                        )
+                );
+
+                // member2 설정
+                final double givenMember2XPosition = 126.9784;
+                final double givenMember2YPosition = 37.5665;
+                final String givenMember2RoadnameAddress = "서울시 종로구 세종대로 1";
+                final String givenMember2InputText = "분위기 좋은 카페를 찾고 있어요";
+                final Category givenMember2Category = testCategoryList.get(0);
+                final CategoryTag givenMember2CategoryTag = testCategoryTagList.get(1);
+                final boolean givenMember2IsPreferred = false;
+
+                initMemberSettings(
+                        givenMember2,
+                        givenMember2XPosition, givenMember2YPosition,
+                        givenMember2RoadnameAddress, givenMember2InputText,
+                        List.of(new CategoryPreferredSetting(givenMember2Category, givenMember2CategoryTag, givenMember2IsPreferred))
+                );
+
+                // member3 설정
+                final double givenMember3XPosition = 128.6014;
+                final double givenMember3YPosition = 35.8714;
+                final String givenMember3RoadnameAddress = "경기도 성남시 분당구 판교로210번길";
+                final String givenMember3InputText = "분식 맛집을 추천해주세요";
+                final Category givenMember3Category = testCategoryList.get(1);
+                final CategoryTag givenMember3CategoryTag = testCategoryTagList.get(2);
+                final boolean givenMember3IsPreferred = true;
+
+                initMemberSettings(
+                        givenMember3,
+                        givenMember3XPosition, givenMember3YPosition,
+                        givenMember3RoadnameAddress, givenMember3InputText,
+                        List.of(new CategoryPreferredSetting(givenMember3Category, givenMember3CategoryTag, givenMember3IsPreferred))
+                );
+
+                // when
+                final Long count = analysisSettingRepositoryImpl.countAnalysisSettingByGroupId(testGroup.getGroupId());
+
+                // then
+                assertThat(count).isEqualTo(givenMemberList.size());
+            }
+
+            @Test
+            @DisplayName("존재하지 않는 그룹 식별자로 조회시 0 이 조회되어야 한다.")
+            void countAnalysisSettingByGroupId_success_tc_02() {
+
+                // given
+                final String givenGroupId = "non-existent-group-id";
+
+                // when
+                final Long count = analysisSettingRepositoryImpl.countAnalysisSettingByGroupId(givenGroupId);
+
+                // then
+                assertThat(count).isEqualTo(0);
+            }
+        }
+
+        @Nested
+        @DisplayName("EXCEPTION")
+        class Exception {
+
+            @Test
+            @DisplayName("그룹 식별자가 null 인 경우 NullPointerException 이 발생하여야 한다.")
+            void countAnalysisSettingByGroupId_exception_tc_01() {
+
+                // given
+                final String givenGroupId = null;
+
+                // when & then
+                assertThrows(
+                        NullPointerException.class,
+                        () -> analysisSettingRepositoryImpl.countAnalysisSettingByGroupId(givenGroupId)
                 );
             }
         }
