@@ -89,4 +89,23 @@ public class AnalysisSettingRepositoryImpl implements AnalysisSettingRepositoryC
 
         return new ArrayList<>(memberMap.values());
     }
+
+    /**
+     * 그룹별 제출된 분석설정 개수 조회
+     * <p>그룹내의 멤버들에 의해 제출된 분석 설정 개수를 조회한다.</p>
+     */
+    public Long countAnalysisSettingByGroupId(String groupId) {
+
+        Objects.requireNonNull(groupId, "groupId must not be null");
+
+        QAnalysisSetting as = QAnalysisSetting.analysisSetting;
+        QMember m = QMember.member;
+
+        return queryFactory
+                .select(as.member.memberId.count())
+                .from(as)
+                .join(as.member, m)
+                .where(m.group.groupId.eq(groupId))
+                .fetchOne();
+    }
 }
