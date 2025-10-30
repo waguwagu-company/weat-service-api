@@ -1,6 +1,7 @@
 package com.waguwagu.weat.domain.analysis.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.waguwagu.weat.domain.analysis.model.entity.AnalysisStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
@@ -21,7 +22,7 @@ public class GetAnalysisStatusDTO {
         private Boolean isSingleMemberGroup;
 
         @Schema(description = "그룹 내 설정을 제출한 멤버 수", example = "2")
-        private int submittedCount;
+        private Long submittedCount;
 
         @Schema(description = "분석시작조건 충족 여부", example = "true")
         @JsonProperty("isAnalysisStartConditionSatisfied")
@@ -29,6 +30,6 @@ public class GetAnalysisStatusDTO {
 
         @Schema(description = "분석 진행 상태", example = "NOT_STARTED")
         @JsonProperty("analysisStatus")
-        private String analysisStatus;
+        private AnalysisStatus analysisStatus;
     }
 }
