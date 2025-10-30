@@ -2,7 +2,7 @@ package com.waguwagu.weat.domain.admin.controller;
 
 import com.waguwagu.weat.domain.admin.dto.*;
 import com.waguwagu.weat.domain.admin.service.AdminService;
-import com.waguwagu.weat.domain.common.dto.ResponseDTO;
+import com.waguwagu.weat.global.model.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -75,21 +75,21 @@ public class AdminController {
     }
 
     @PutMapping("/categoryTags")
-    public ResponseDTO<RenameCategoryTagDTO.Response> renameCategoryTag(
+    public Response<RenameCategoryTagDTO.Response> renameCategoryTag(
             @RequestBody RenameCategoryTagDTO.Request request) {
-        return ResponseDTO.of(adminService.renameCategoryTag(request));
+        return Response.of(adminService.renameCategoryTag(request));
     }
 
     @DeleteMapping("/categoryTags/{categoryTagId}")
-    public ResponseDTO<DeleteCategoryTagDTO.Response> deleteCategoryTag
+    public Response<DeleteCategoryTagDTO.Response> deleteCategoryTag
             (@PathVariable("categoryTagId") Long categoryTagId) {
-        return ResponseDTO.of(adminService.deleteCategoryTag(categoryTagId));
+        return Response.of(adminService.deleteCategoryTag(categoryTagId));
     }
 
     @PostMapping("/categories/{categoryId}/categoryTags")
-    public ResponseDTO<CreateCategoryTagDTO.Response> createCategoryTag(
+    public Response<CreateCategoryTagDTO.Response> createCategoryTag(
             @PathVariable("categoryId") Long categoryId,
             @RequestBody CreateCategoryTagDTO.Request request) {
-        return ResponseDTO.of(adminService.createCategoryTag(categoryId, request));
+        return Response.of(adminService.createCategoryTag(categoryId, request));
     }
 }
