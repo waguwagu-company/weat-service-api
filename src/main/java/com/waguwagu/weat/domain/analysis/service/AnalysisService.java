@@ -164,42 +164,25 @@ public class AnalysisService {
                 .build();
     }
 
-    // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
     public AnalysisStartDTO.Response analysisStart(AnalysisStartDTO.Request request) {
 
-        var groupId = request.getGroupId();
-
         // 그룹 조회
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GroupNotFoundException(groupId));
+        Group group = groupRepository.findById(request.getGroupId())
+                .orElseThrow(() -> new GroupNotFoundException(request.getGroupId()));
 
-
-        var analysisStartAvailable = getAnalysisStatus(groupId);
-
-        if (!analysisStartAvailable.getAnalysisStatus().equals(AnalysisStatus.NOT_STARTED.toString())) {
-            throw new AnalysisAlreadyStartedForGroupIdException(groupId);
-        }
-
-        if (!analysisStartAvailable.getIsAnalysisStartConditionSatisfied()) {
-            throw new AnalysisConditionNotSatisfiedForGroupIdException(groupId);
-        }
+        // 분석시작조건 충족 여부 확인
+        analysisStartPolicy.validate(group.getGroupId());
 
         // 그룹에 대한 분석정보 조회
         Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId())
                 .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
 
-        // 이미 진행중인 분석인지 확인
-        if (!analysis.getAnalysisStatus().equals(AnalysisStatus.NOT_STARTED)) {
-            // 이미 진행중이라면 208 응답 반환
-            throw new AnalysisAlreadyStartedForGroupIdException(groupId);
-        }
-
-        // 진행중이지 않다면, "진행중" 상태로 변경
+        // "진행중" 상태로 변경
         analysis.setAnalysisStatus(AnalysisStatus.IN_PROGRESS);
 
         // 그룹에 속한 멤버들의 분석 설정 일괄 조회
         List<MemberAnalysisSettingDTO> groupMemberSettings =
-                analysisSettingRepository.findMemberAnalysisSettingsByGroupId(groupId);
+                analysisSettingRepository.findMemberAnalysisSettingsByGroupId(group.getGroupId());
 
         // AI 분석 시작 요청에 사용되는 객체로 변환
         List<AIAnalysisDTO.Request.MemberSetting> memberSettingList = groupMemberSettings.stream()
