@@ -20,8 +20,8 @@ public class AnalysisSettingSubmitPolicy {
      *
      * <p>분석 설정 제출이 가능한 상태인지 검증하고, 만족하지 못하는 조건이 있는 경우 예외 발생시킨다.</p>
      */
-    public void validate(Long memberId) {
-        if (memberRepository.existsById(memberId)) {
+    public void validate(long memberId) {
+        if (!memberRepository.existsById(memberId)) {
             throw new MemberNotFoundException(memberId);
         }
 
