@@ -89,7 +89,7 @@ public class AnalysisService {
 
     // 멤버별 분석 설정 제출 여부 조회
     public IsMemberSubmitAnalysisSettingDTO.Response isMemberSubmitAnalysisSetting(Long memberId) {
-
+        // 멤버 정보 조회
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
@@ -103,14 +103,12 @@ public class AnalysisService {
 
     // 멤버별 분석 설정 제출
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
-        // 회원 정보 조회
+        // 멤버 정보 조회
         Member member = memberRepository.findById(requestDto.getMemberId())
                 .orElseThrow(() -> new MemberNotFoundException(requestDto.getMemberId()));
 
-        // 이미 제출한 회원인 경우
-        if (isMemberSubmitAnalysisSetting(requestDto.getMemberId()).isSubmitted()) {
-            throw new MemberAlreadySubmitSettingForMemberIdException(member.getMemberId());
-        }
+        // 멤버가 분석 설정을 제출할 수 있는 상태인지 검증
+        analysisSettingSubmitPolicy.validate(member.getMemberId());
 
         // 분석 정보 조회
         Analysis analysis = analysisRepository.findByGroupGroupId(member.getGroup().getGroupId())
@@ -122,6 +120,7 @@ public class AnalysisService {
                 .member(member)
                 .build();
 
+        // 설정 정보 저장
         analysisSettingRepository.save(analysisSetting);
 
         // 위치 설정
