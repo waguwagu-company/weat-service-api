@@ -9,14 +9,17 @@ import com.waguwagu.weat.domain.analysis.repository.AnalysisSettingRepository;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.EnumSet;
 import java.util.Set;
 
+@Validated
 @Component
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -28,7 +31,7 @@ public class AnalysisStartPolicy {
      *
      * <p>분석 시작을 위해 필요한 조건들은 평가한다.</p>
      */
-    public Result evaluate(String groupId) {
+    public Result evaluate(@NotNull String groupId) {
         boolean isSubmittedConditionSatisfied = support.evaluateSubmittedCondition(groupId);
         boolean isAnalysisStatusConditionSatisfied = support.evaluateAnalysisStatusCondition(groupId);
         boolean isSatisfied = isSubmittedConditionSatisfied && isAnalysisStatusConditionSatisfied;
@@ -45,7 +48,7 @@ public class AnalysisStartPolicy {
      *
      * <p>분석 시작이 가능한지 검증하고, 만족하지 못하는 조건이 있는 경우 예외를 발생시킨다.</p>
      */
-    public void validate(String groupId) {
+    public void validate(@NotNull String groupId) {
         if (!support.evaluateAnalysisStatusCondition(groupId)) {
             throw new AnalysisAlreadyStartedForGroupIdException(groupId);
         }
@@ -69,6 +72,7 @@ public class AnalysisStartPolicy {
     ) {
     }
 
+    @Validated
     @Component
     @RequiredArgsConstructor
     @Transactional(readOnly = true)
@@ -84,7 +88,7 @@ public class AnalysisStartPolicy {
          *
          * @see AnalysisStartPolicy.SubmitCriteria
          */
-        public boolean evaluateSubmittedCondition(String groupId) {
+        public boolean evaluateSubmittedCondition(@NotNull String groupId) {
             Group group = groupRepository.findById(groupId)
                     .orElseThrow(() -> new GroupNotFoundException(groupId));
 
@@ -103,7 +107,7 @@ public class AnalysisStartPolicy {
          *
          * @see AnalysisStartPolicy.StatusCriteria
          */
-        public boolean evaluateAnalysisStatusCondition(String groupId) {
+        public boolean evaluateAnalysisStatusCondition(@NotNull String groupId) {
             AnalysisStatus analysisStatus = analysisRepository.findByGroupGroupId(groupId)
                     .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(groupId))
                     .getAnalysisStatus();
@@ -146,7 +150,7 @@ public class AnalysisStartPolicy {
         // 허용된 분석 상태 집합
         private final Set<AnalysisStatus> allowedStatuses;
 
-        public boolean isSatisfied(AnalysisStatus status) {
+        public boolean isSatisfied(@NotNull AnalysisStatus status) {
             return allowedStatuses.contains(status);
         }
     }
