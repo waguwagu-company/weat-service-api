@@ -5,7 +5,6 @@ import com.waguwagu.weat.domain.analysis.model.entity.AnalysisStatus;
 import com.waguwagu.weat.domain.analysis.repository.AnalysisRepository;
 import com.waguwagu.weat.domain.group.exception.GroupMemberLimitExceededException;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
-import com.waguwagu.weat.domain.group.mapper.GroupMapper;
 import com.waguwagu.weat.domain.group.model.dto.*;
 import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
@@ -15,7 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -23,7 +22,6 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
-    private final GroupMapper groupMapper;
     private final AnalysisRepository analysisRepository;
 
     @Transactional
