@@ -4,7 +4,7 @@ import com.waguwagu.weat.domain.group.model.entity.Group;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface GroupRepository extends JpaRepository<Group, String> {
+public interface GroupRepository extends JpaRepository<Group, String>, GroupRepositoryCustom {
 
     @Query(value = 
     """
