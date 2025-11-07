@@ -200,7 +200,6 @@ class GroupRepositoryImplTest {
                 assertThat(row.getPlaceImageUrl()).isEqualTo("https://lh3.googleusercontent.com/placeImage1");
             }
 
-            // 3) 이미지가 없을 경우 null
             @Test
             @DisplayName("이미지가 없으면 placeImageUrl은 null로 조회된다")
             void nullWhenNoImage() {
@@ -245,7 +244,7 @@ class GroupRepositoryImplTest {
 
             @Test
             @DisplayName("그룹 식별자가 null인 경우 NullPointerException이 발생해야 한다.")
-            void findMemberAnalysisSettingsByGroupId_exception_tc_01() {
+            void nullGroupIdThrowsException() {
                 // given
                 final String groupId = null;
 
