@@ -24,8 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -134,20 +135,34 @@ public class AnalysisService {
         analysisSettingDetailRepository.save(locationSetting);
 
         // 카테고리 설정
-        for (SubmitAnalysisSettingDTO.Request.CategorySetting categorySettingDTO : requestDto.getCategorySettingList()) {
+        List<SubmitAnalysisSettingDTO.Request.CategorySetting> categorySettingList = requestDto.getCategorySettingList();
+        List<Long> categoryTagIds = categorySettingList.stream()
+                .map(SubmitAnalysisSettingDTO.Request.CategorySetting::getCategoryTagId)
+                .distinct()
+                .toList();
 
-            CategoryTag categoryTag = categoryTagRepository.findById(categorySettingDTO.getCategoryTagId())
-                    .orElseThrow(() -> new CategoryTagNotFoundException(categorySettingDTO.getCategoryTagId()));
+        Map<Long, CategoryTag> categoryTagMap = categoryTagRepository.findByIdIn(categoryTagIds).stream()
+                .collect(Collectors.toMap(CategoryTag::getCategoryTagId, Function.identity()));
 
-            CategorySetting categorySetting = CategorySetting.builder()
-                    .analysisSetting(analysisSetting)
-                    .category(categoryTag.getCategory())
-                    .categoryTag(categoryTag)
-                    .isPreferred(categorySettingDTO.getIsPreferred())
-                    .build();
+        List<CategorySetting> categorySettings = categorySettingList.stream()
+                .map(dto -> {
+                    Long categoryTagId = dto.getCategoryTagId();
+                    CategoryTag categoryTag = categoryTagMap.get(categoryTagId);
 
-            analysisSettingDetailRepository.save(categorySetting);
-        }
+                    if (categoryTag == null) {
+                        throw new CategoryTagNotFoundException(categoryTagId);
+                    }
+
+                    return CategorySetting.builder()
+                            .analysisSetting(analysisSetting)
+                            .category(categoryTag.getCategory())
+                            .categoryTag(categoryTag)
+                            .isPreferred(dto.getIsPreferred())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        analysisSettingDetailRepository.saveAll(categorySettings);
 
         // 텍스트 입력 설정
         TextInputSetting textInputSetting = TextInputSetting.builder()
