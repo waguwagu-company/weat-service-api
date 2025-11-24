@@ -102,6 +102,7 @@ public class AnalysisService {
     }
 
     // 멤버별 분석 설정 제출
+    @Transactional
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
         // 회원 정보 조회
         Member member = memberRepository.findById(requestDto.getMemberId())
