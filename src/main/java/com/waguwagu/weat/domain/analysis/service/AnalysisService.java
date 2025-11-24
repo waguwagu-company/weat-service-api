@@ -37,14 +37,9 @@ public class AnalysisService {
     private final AIServiceAdaptor aiServiceAdaptor;
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
-    private final CategoryRepository categoryRepository;
     private final AnalysisRepository analysisRepository;
     private final AnalysisSettingRepository analysisSettingRepository;
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
-    private final AnalysisAsyncExecutor analysisAsyncExecutor;
-    private final TextInputSettingRepository textInputSettingRepository;
-    private final LocationSettingRepository locationSettingRepository;
-    private final CategorySettingRepository categorySettingRepository;
     private final CategoryTagRepository categoryTagRepository;
     private final AnalysisResultLikeRepository analysisResultLikeRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
@@ -123,7 +118,7 @@ public class AnalysisService {
                 .member(member)
                 .build();
 
-        analysisSettingRepository.save(analysisSetting);
+        AnalysisSetting savedAnalysisSetting = analysisSettingRepository.save(analysisSetting);
 
         // 위치 설정
         LocationSetting locationSetting = LocationSetting.builder()
@@ -175,7 +170,7 @@ public class AnalysisService {
 
         return SubmitAnalysisSettingDTO.Response.builder()
                 .memberId(member.getMemberId())
-                .analysisSettingId(analysisSetting.getAnalysisSettingId())
+                .analysisSettingId(savedAnalysisSetting.getAnalysisSettingId())
                 .build();
     }
 
