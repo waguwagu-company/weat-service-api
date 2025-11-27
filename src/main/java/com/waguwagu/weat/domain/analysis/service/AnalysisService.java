@@ -2,9 +2,14 @@ package com.waguwagu.weat.domain.analysis.service;
 
 import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
 import com.waguwagu.weat.domain.analysis.event.AnalysisStartEvent;
-import com.waguwagu.weat.domain.analysis.exception.*;
+import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
+import com.waguwagu.weat.domain.analysis.exception.AnalysisResultDetailNotFoundException;
+import com.waguwagu.weat.domain.analysis.exception.MemberAlreadySubmitSettingForMemberIdException;
+import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
+import com.waguwagu.weat.domain.analysis.policy.AnalysisSettingSubmitPolicy;
+import com.waguwagu.weat.domain.analysis.policy.AnalysisStartPolicy;
 import com.waguwagu.weat.domain.analysis.repository.*;
 import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
 import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
@@ -15,20 +20,24 @@ import com.waguwagu.weat.domain.group.model.entity.Group;
 import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Validated
 @Transactional
 @RequiredArgsConstructor
 public class AnalysisService {
@@ -36,51 +45,43 @@ public class AnalysisService {
     private final AIServiceAdaptor aiServiceAdaptor;
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
-    private final CategoryRepository categoryRepository;
     private final AnalysisRepository analysisRepository;
     private final AnalysisSettingRepository analysisSettingRepository;
     private final AnalysisSettingDetailRepository analysisSettingDetailRepository;
-    private final AnalysisAsyncExecutor analysisAsyncExecutor;
-    private final TextInputSettingRepository textInputSettingRepository;
-    private final LocationSettingRepository locationSettingRepository;
-    private final CategorySettingRepository categorySettingRepository;
     private final CategoryTagRepository categoryTagRepository;
     private final AnalysisResultLikeRepository analysisResultLikeRepository;
     private final AnalysisResultDetailRepository analysisResultDetailRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final AnalysisStartPolicy analysisStartPolicy;
+    private final AnalysisSettingSubmitPolicy analysisSettingSubmitPolicy;
 
     @Value("${ai.service.uri.validation}")
     private String validationUri;
 
     private static final Duration AI_TIMEOUT = Duration.ofSeconds(60);
 
-    // 분석 시작가능조건 충족여부 및 분석상태 조회
-    public GetAnalysisStatusDTO.Response getAnalysisStatus(String groupId) {
+    public GetAnalysisStatusDTO.Response getAnalysisStatus(@NotNull String groupId) {
 
-        final int GROUP_CRITERIA = 2;
-        final int SINGLE_CRITERIA = 1;
-
+        // 그룹 정보 조회
         Group group = groupRepository.findById(groupId)
                 .orElseThrow(() -> new GroupNotFoundException(groupId));
 
-        String analysisStatus = analysisRepository.findByGroupGroupId(groupId)
+        // 그룹의 분석상태 조회
+        AnalysisStatus analysisStatus = analysisRepository.findByGroupGroupId(groupId)
                 .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(groupId))
-                .getAnalysisStatus().toString();
+                .getAnalysisStatus();
 
-        List<Member> memberList = memberRepository.findAllByGroupGroupId(groupId);
+        // 그룹내의 설정 제출 수
+        Long submittedCount = analysisSettingRepository.countAnalysisSettingByGroupId(groupId);
 
-        int submittedCount = (int) memberList.stream()
-                .filter(member -> analysisSettingRepository.existsByMemberMemberId(member.getMemberId()))
-                .count();
-
-        int criteria = group.isSingleMemberGroup() ? SINGLE_CRITERIA : GROUP_CRITERIA;
-        boolean isSatisfied = submittedCount >= criteria;
+        // 분석시작가능 여부 평가
+        AnalysisStartPolicy.Result analysisStartPolicyEvaluateteResult = analysisStartPolicy.evaluate(groupId);
 
         return GetAnalysisStatusDTO.Response.builder()
                 .groupId(group.getGroupId())
                 .isSingleMemberGroup(group.isSingleMemberGroup())
                 .submittedCount(submittedCount)
-                .isAnalysisStartConditionSatisfied(isSatisfied)
+                .isAnalysisStartConditionSatisfied(analysisStartPolicyEvaluateteResult.isSatisfied())
                 .analysisStatus(analysisStatus)
                 .build();
     }
@@ -88,7 +89,7 @@ public class AnalysisService {
 
     // 멤버별 분석 설정 제출 여부 조회
     public IsMemberSubmitAnalysisSettingDTO.Response isMemberSubmitAnalysisSetting(Long memberId) {
-
+        // 멤버 정보 조회
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new MemberNotFoundException(memberId));
 
@@ -102,14 +103,12 @@ public class AnalysisService {
 
     // 멤버별 분석 설정 제출
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
-        // 회원 정보 조회
+        // 멤버 정보 조회
         Member member = memberRepository.findById(requestDto.getMemberId())
                 .orElseThrow(() -> new MemberNotFoundException(requestDto.getMemberId()));
 
-        // 이미 제출한 회원인 경우
-        if (isMemberSubmitAnalysisSetting(requestDto.getMemberId()).isSubmitted()) {
-            throw new MemberAlreadySubmitSettingForMemberIdException(member.getMemberId());
-        }
+        // 멤버가 분석 설정을 제출할 수 있는 상태인지 검증
+        analysisSettingSubmitPolicy.validate(member.getMemberId());
 
         // 분석 정보 조회
         Analysis analysis = analysisRepository.findByGroupGroupId(member.getGroup().getGroupId())
@@ -121,6 +120,7 @@ public class AnalysisService {
                 .member(member)
                 .build();
 
+        // 설정 정보 저장
         analysisSettingRepository.save(analysisSetting);
 
         // 위치 설정
@@ -163,42 +163,25 @@ public class AnalysisService {
                 .build();
     }
 
-    // TODO: 개발 진행중, AI 분석 서비스 응답 형식 정해지면 재개
     public AnalysisStartDTO.Response analysisStart(AnalysisStartDTO.Request request) {
 
-        var groupId = request.getGroupId();
-
         // 그룹 조회
-        Group group = groupRepository.findById(groupId)
-                .orElseThrow(() -> new GroupNotFoundException(groupId));
+        Group group = groupRepository.findById(request.getGroupId())
+                .orElseThrow(() -> new GroupNotFoundException(request.getGroupId()));
 
-
-        var analysisStartAvailable = getAnalysisStatus(groupId);
-
-        if (!analysisStartAvailable.getAnalysisStatus().equals(AnalysisStatus.NOT_STARTED.toString())) {
-            throw new AnalysisAlreadyStartedForGroupIdException(groupId);
-        }
-
-        if (!analysisStartAvailable.getIsAnalysisStartConditionSatisfied()) {
-            throw new AnalysisConditionNotSatisfiedForGroupIdException(groupId);
-        }
+        // 분석시작조건 충족 여부 확인
+        analysisStartPolicy.validate(group.getGroupId());
 
         // 그룹에 대한 분석정보 조회
         Analysis analysis = analysisRepository.findByGroupGroupId(group.getGroupId())
                 .orElseThrow(() -> new AnalysisNotFoundForGroupIdException(group.getGroupId()));
 
-        // 이미 진행중인 분석인지 확인
-        if (!analysis.getAnalysisStatus().equals(AnalysisStatus.NOT_STARTED)) {
-            // 이미 진행중이라면 208 응답 반환
-            throw new AnalysisAlreadyStartedForGroupIdException(groupId);
-        }
-
-        // 진행중이지 않다면, "진행중" 상태로 변경
+        // "진행중" 상태로 변경
         analysis.setAnalysisStatus(AnalysisStatus.IN_PROGRESS);
 
         // 그룹에 속한 멤버들의 분석 설정 일괄 조회
         List<MemberAnalysisSettingDTO> groupMemberSettings =
-                analysisSettingRepository.findMemberAnalysisSettingsByGroupId(groupId);
+                analysisSettingRepository.findMemberAnalysisSettingsByGroupId(group.getGroupId());
 
         // AI 분석 시작 요청에 사용되는 객체로 변환
         List<AIAnalysisDTO.Request.MemberSetting> memberSettingList = groupMemberSettings.stream()

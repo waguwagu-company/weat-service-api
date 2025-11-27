@@ -1,14 +1,16 @@
 package com.waguwagu.weat.domain.analysis.model.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Schema(description = "분석 시작 DTO")
 public class AnalysisStartDTO {
 
     @Getter
+    @Builder
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    @NoArgsConstructor(access = AccessLevel.PROTECTED)
     @Schema(description = "분석 시작 요청")
     public static class Request {
         @Schema(description = "그룹 식별자", example = "f5d8931a830e41968663ce0dc12bf9b2")
