@@ -5,18 +5,19 @@ import com.waguwagu.weat.domain.analysis.event.AnalysisStartEvent;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisAlreadyStartedForGroupIdException;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisConditionNotSatisfiedForGroupIdException;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
-import com.waguwagu.weat.domain.analysis.model.dto.AIAnalysisDTO;
-import com.waguwagu.weat.domain.analysis.model.dto.AnalysisStartDTO;
-import com.waguwagu.weat.domain.analysis.model.dto.GetAnalysisStatusDTO;
-import com.waguwagu.weat.domain.analysis.model.dto.MemberAnalysisSettingDTO;
-import com.waguwagu.weat.domain.analysis.model.entity.Analysis;
-import com.waguwagu.weat.domain.analysis.model.entity.AnalysisStatus;
+import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
+import com.waguwagu.weat.domain.analysis.model.dto.*;
+import com.waguwagu.weat.domain.analysis.model.entity.*;
 import com.waguwagu.weat.domain.analysis.policy.AnalysisSettingSubmitPolicy;
 import com.waguwagu.weat.domain.analysis.policy.AnalysisStartPolicy;
 import com.waguwagu.weat.domain.analysis.repository.*;
+import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
+import com.waguwagu.weat.domain.category.model.entity.Category;
+import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
 import com.waguwagu.weat.domain.category.repository.CategoryTagRepository;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.entity.Group;
+import com.waguwagu.weat.domain.group.model.entity.Member;
 import com.waguwagu.weat.domain.group.repository.GroupRepository;
 import com.waguwagu.weat.domain.group.repository.MemberRepository;
 import jakarta.validation.ConstraintViolationException;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -39,7 +41,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.*;
 
 @RecordApplicationEvents
@@ -181,6 +185,279 @@ class AnalysisServiceTest {
             }
         }
     }
+
+
+    @Nested
+    @DisplayName("submitAnalysisSetting - 멤버별 분석 설정 제출")
+    class SubmitAnalysisSetting {
+
+        private SubmitAnalysisSettingDTO.Request mockRequest;
+
+        // 공통 fixture 값들
+        private Long givenMemberId;
+        private String givenGroupId;
+        private Long givenAnalysisSettingId;
+
+        private Double givenXPosition;
+        private Double givenYPosition;
+        private String givenRoadnameAddress;
+
+        private Long givenCategoryTagId1;
+        private Long givenCategoryTagId2;
+        private boolean givenIsPreferred1;
+        private boolean givenIsPreferred2;
+
+        private Long givenCategoryId1;
+        private Long givenCategoryId2;
+        private String givenCategoryName1;
+        private String givenCategoryName2;
+        private String givenInputText;
+
+        @BeforeEach
+        void setUpRequest() {
+            // 값 세팅
+            givenMemberId = 1L;
+            givenGroupId = UUID.randomUUID().toString().replace("-", "");
+            givenAnalysisSettingId = 999L;
+
+            givenXPosition = 37.5666102;
+            givenYPosition = 126.9783881;
+            givenRoadnameAddress = "서울특별시 중구 세종대로 110";
+
+            givenCategoryTagId1 = 75L;
+            givenCategoryTagId2 = 83L;
+            givenIsPreferred1 = true;
+            givenIsPreferred2 = false;
+
+            givenCategoryId1 = 10L;
+            givenCategoryId2 = 11L;
+            givenCategoryName1 = "한식";
+            givenCategoryName2 = "일식";
+            givenInputText = "조용하고 덜 혼잡한 곳을 원해요";
+
+            // Request DTO mocking
+            mockRequest = mock(SubmitAnalysisSettingDTO.Request.class);
+            when(mockRequest.getMemberId()).thenReturn(givenMemberId);
+
+            // 위치 설정
+            SubmitAnalysisSettingDTO.Request.LocationSetting mockLocationSetting =
+                    mock(SubmitAnalysisSettingDTO.Request.LocationSetting.class);
+            when(mockLocationSetting.getXPosition()).thenReturn(givenXPosition);
+            when(mockLocationSetting.getYPosition()).thenReturn(givenYPosition);
+            when(mockLocationSetting.getRoadnameAddress()).thenReturn(givenRoadnameAddress);
+            when(mockRequest.getLocationSetting()).thenReturn(mockLocationSetting);
+
+            // 카테고리 설정
+            SubmitAnalysisSettingDTO.Request.CategorySetting mockCategorySetting1 =
+                    mock(SubmitAnalysisSettingDTO.Request.CategorySetting.class);
+            when(mockCategorySetting1.getCategoryTagId()).thenReturn(givenCategoryTagId1);
+            when(mockCategorySetting1.getIsPreferred()).thenReturn(givenIsPreferred1);
+
+            SubmitAnalysisSettingDTO.Request.CategorySetting mockCategorySetting2 =
+                    mock(SubmitAnalysisSettingDTO.Request.CategorySetting.class);
+            when(mockCategorySetting2.getCategoryTagId()).thenReturn(givenCategoryTagId2);
+            when(mockCategorySetting2.getIsPreferred()).thenReturn(givenIsPreferred2);
+
+            when(mockRequest.getCategorySettingList())
+                    .thenReturn(List.of(mockCategorySetting1, mockCategorySetting2));
+
+            // 텍스트 입력 설정
+            SubmitAnalysisSettingDTO.Request.TextInputSetting mockTextInputSetting =
+                    mock(SubmitAnalysisSettingDTO.Request.TextInputSetting.class);
+            when(mockTextInputSetting.getInputText()).thenReturn(givenInputText);
+            when(mockRequest.getTextInputSetting()).thenReturn(mockTextInputSetting);
+
+
+            // Group / Member Mock
+            Group mockGroup = mock(Group.class);
+            when(mockGroup.getGroupId()).thenReturn(givenGroupId);
+
+            Member mockMember = mock(Member.class);
+            when(mockMember.getMemberId()).thenReturn(givenMemberId);
+            when(mockMember.getGroup()).thenReturn(mockGroup);
+
+            when(memberRepository.findById(givenMemberId))
+                    .thenReturn(Optional.of(mockMember));
+        }
+
+        private GivenContext givenSubmitSuccess() {
+            // Analysis mock
+            Analysis mockAnalysis = mock(Analysis.class);
+
+            // Repository stubbing
+            when(analysisSettingRepository.existsByMemberMemberId(givenMemberId)).thenReturn(false);
+
+            when(analysisRepository.findByGroupGroupId(givenGroupId)).thenReturn(Optional.of(mockAnalysis));
+
+            AnalysisSetting mockSavedAnalysisSetting = mock(AnalysisSetting.class);
+            when(mockSavedAnalysisSetting.getAnalysisSettingId()).thenReturn(givenAnalysisSettingId);
+
+            when(analysisSettingRepository.save(any(AnalysisSetting.class))).thenReturn(mockSavedAnalysisSetting);
+
+            // Category / CategoryTag mock
+            Category mockCategory1 = mock(Category.class);
+            when(mockCategory1.getCategoryId()).thenReturn(givenCategoryId1);
+            when(mockCategory1.getCategoryName()).thenReturn(givenCategoryName1);
+
+            Category mockCategory2 = mock(Category.class);
+            when(mockCategory2.getCategoryId()).thenReturn(givenCategoryId2);
+            when(mockCategory2.getCategoryName()).thenReturn(givenCategoryName2);
+
+            CategoryTag mockCategoryTag1 = mock(CategoryTag.class);
+            when(mockCategoryTag1.getCategoryTagId()).thenReturn(givenCategoryTagId1);
+            when(mockCategoryTag1.getCategory()).thenReturn(mockCategory1);
+
+            CategoryTag mockCategoryTag2 = mock(CategoryTag.class);
+            when(mockCategoryTag2.getCategoryTagId()).thenReturn(givenCategoryTagId2);
+            when(mockCategoryTag2.getCategory()).thenReturn(mockCategory2);
+
+            when(categoryTagRepository.findByCategoryTagIdIn(List.of(givenCategoryTagId1, givenCategoryTagId2)))
+                    .thenReturn(List.of(mockCategoryTag1, mockCategoryTag2));
+
+            return new GivenContext(
+                    givenMemberId,
+                    givenAnalysisSettingId,
+                    givenXPosition,
+                    givenYPosition,
+                    givenRoadnameAddress,
+                    givenCategoryTagId1,
+                    givenCategoryTagId2,
+                    givenIsPreferred1,
+                    givenIsPreferred2,
+                    givenInputText
+            );
+        }
+
+        private record GivenContext(
+                Long memberId, Long analysisSettingId,
+                Double x, Double y, String addr,
+                Long tagId1, Long tagId2, Boolean pref1, Boolean pref2,
+                String inputText
+        ) {
+        }
+
+
+        @Nested
+        @DisplayName("SUCCESS")
+        class SuccessTest {
+
+            @Test
+            @DisplayName("정상 제출 시 응답이 올바르게 반환되어야 한다.")
+            void submitAnalysisSetting_success_tc_01() {
+                // given
+                final GivenContext ctx = givenSubmitSuccess();
+
+                // when
+                final SubmitAnalysisSettingDTO.Response response =
+                        analysisService.submitAnalysisSetting(mockRequest);
+
+                // then
+                assertThat(response)
+                        .extracting(
+                                SubmitAnalysisSettingDTO.Response::getMemberId,
+                                SubmitAnalysisSettingDTO.Response::getAnalysisSettingId
+                        )
+                        .containsExactly(
+                                ctx.memberId,
+                                ctx.analysisSettingId
+                        );
+            }
+
+
+            @Test
+            @DisplayName("정상 제출 시 위치/카테고리/텍스트가 저장 요청 값과 동일해야 한다.")
+            void submitAnalysisSetting_success_tc_02() {
+                // given
+                final GivenContext ctx = givenSubmitSuccess();
+
+                // when
+                analysisService.submitAnalysisSetting(mockRequest);
+
+                // then
+                // Location
+                ArgumentCaptor<LocationSetting> locationCaptor = ArgumentCaptor.forClass(LocationSetting.class);
+                then(analysisSettingDetailRepository).should(times(1)).save(locationCaptor.capture());
+                LocationSetting savedLoc = locationCaptor.getValue();
+
+                assertThat(savedLoc)
+                        .extracting(
+                                LocationSetting::getXPosition,
+                                LocationSetting::getYPosition,
+                                LocationSetting::getRoadnameAddress
+                        )
+                        .containsExactly(ctx.x, ctx.y, ctx.addr);
+
+                // Category
+                @SuppressWarnings("unchecked")
+                ArgumentCaptor<List<CategorySetting>> categoryCaptor =
+                        (ArgumentCaptor<List<CategorySetting>>) (ArgumentCaptor<?>) ArgumentCaptor.forClass(List.class);
+                then(analysisSettingDetailRepository).should(times(1)).saveAll(categoryCaptor.capture());
+
+                List<CategorySetting> savedCats = categoryCaptor.getValue();
+
+                assertThat(savedCats).hasSize(2);
+                assertThat(savedCats)
+                        .extracting(cs -> cs.getCategoryTag().getCategoryTagId(),
+                                CategorySetting::getIsPreferred)
+                        .containsExactlyInAnyOrder(
+                                tuple(ctx.tagId1, ctx.pref1),
+                                tuple(ctx.tagId2, ctx.pref2)
+                        );
+
+                // Text
+                ArgumentCaptor<TextInputSetting> textCaptor = ArgumentCaptor.forClass(TextInputSetting.class);
+                then(analysisSettingDetailRepository).should(times(1)).save(textCaptor.capture());
+                assertThat(textCaptor.getValue().getInputText()).isEqualTo(ctx.inputText);
+            }
+
+        }
+
+
+        @Nested
+        @DisplayName("EXCEPTION")
+        class ExceptionTest {
+            @Test
+            @DisplayName("존재하지 않는 멤버 ID면 MemberNotFoundException이 발생해야 한다.")
+            void submitAnalysisSetting_exception_tc_01() {
+                // given
+                when(memberRepository.findById(givenMemberId)).thenReturn(Optional.empty());
+
+                // when & then
+                assertThrows(MemberNotFoundException.class, () ->
+                        analysisService.submitAnalysisSetting(mockRequest)
+                );
+            }
+
+
+            @Test
+            @DisplayName("그룹에 대한 분석정보가 없으면 AnalysisNotFoundForGroupIdException이 발생하여야 한다.")
+            void submitAnalysisSetting_exception_tc_02() {
+                // given
+                when(analysisRepository.findByGroupGroupId(givenGroupId)).thenReturn(Optional.empty());
+
+                // when & then
+                assertThrows(AnalysisNotFoundForGroupIdException.class,
+                        () -> analysisService.submitAnalysisSetting(mockRequest)
+                );
+            }
+
+            @Test
+            @DisplayName("요청에 포함된 카테고리 태그 중 하나라도 존재하지 않으면 CategoryTagNotFoundException이 발생하여야 한다.")
+            void submitAnalysisSetting_exception_tc_03() {
+                // given
+                givenSubmitSuccess();
+
+                // 카테고리 태그 조회 부분만 override
+                when(categoryTagRepository.findByCategoryTagIdIn(anyList())).thenReturn(List.of());
+
+                // when & then
+                assertThrows(CategoryTagNotFoundException.class,
+                        () -> analysisService.submitAnalysisSetting(mockRequest)
+                );
+            }
+        }
+    }
+
 
     @Nested
     @DisplayName("analysisStart - 분석시작")

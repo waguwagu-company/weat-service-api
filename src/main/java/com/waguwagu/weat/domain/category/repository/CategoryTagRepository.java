@@ -10,5 +10,5 @@ public interface CategoryTagRepository extends JpaRepository<CategoryTag, Long> 
     List<CategoryTag> findAllByCategoryCategoryIdOrderByCategoryTagOrder(Long categoryId);
     List<CategoryTag> findByCategoryOrderByCategoryTagOrderDesc(Category category);
 
-    List<CategoryTag> findByIdIn(List<Long> categoryTagIds);
+    List<CategoryTag> findByCategoryTagIdIn(List<Long> categoryTagIds);
 }

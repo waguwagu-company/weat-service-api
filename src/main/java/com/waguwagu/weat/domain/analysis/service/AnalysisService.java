@@ -4,7 +4,6 @@ import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
 import com.waguwagu.weat.domain.analysis.event.AnalysisStartEvent;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisResultDetailNotFoundException;
-import com.waguwagu.weat.domain.analysis.exception.MemberAlreadySubmitSettingForMemberIdException;
 import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
@@ -13,7 +12,6 @@ import com.waguwagu.weat.domain.analysis.policy.AnalysisStartPolicy;
 import com.waguwagu.weat.domain.analysis.repository.*;
 import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
 import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
-import com.waguwagu.weat.domain.category.repository.CategoryRepository;
 import com.waguwagu.weat.domain.category.repository.CategoryTagRepository;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.entity.Group;
@@ -122,7 +120,7 @@ public class AnalysisService {
                 .build();
 
         // 설정 정보 저장
-        analysisSettingRepository.save(analysisSetting);
+        AnalysisSetting savedAnalysisSetting = analysisSettingRepository.save(analysisSetting);
 
         // 위치 설정
         LocationSetting locationSetting = LocationSetting.builder()
@@ -141,7 +139,7 @@ public class AnalysisService {
                 .distinct()
                 .toList();
 
-        Map<Long, CategoryTag> categoryTagMap = categoryTagRepository.findByIdIn(categoryTagIds).stream()
+        Map<Long, CategoryTag> categoryTagMap = categoryTagRepository.findByCategoryTagIdIn(categoryTagIds).stream()
                 .collect(Collectors.toMap(CategoryTag::getCategoryTagId, Function.identity()));
 
         List<CategorySetting> categorySettings = categorySettingList.stream()
