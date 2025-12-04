@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface AnalysisSettingRepositoryCustom {
     List<MemberAnalysisSettingDTO> findMemberAnalysisSettingsByGroupId(String groupId);
+    Long countAnalysisSettingByGroupId(String groupId);
 }
