@@ -140,15 +140,15 @@ class AnalysisServiceIntegrationTest {
         testCategories = List.of(
                 categoryRepository.save(Category.builder()
                         .categoryName("한식")
-                        .categoryOrder(1L)
+                        .categoryOrder(1)
                         .build()),
                 categoryRepository.save(Category.builder()
                         .categoryName("일식")
-                        .categoryOrder(2L)
+                        .categoryOrder(2)
                         .build()),
                 categoryRepository.save(Category.builder()
                         .categoryName("양식")
-                        .categoryOrder(3L)
+                        .categoryOrder(3)
                         .build())
         );
 

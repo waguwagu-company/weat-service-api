@@ -102,11 +102,11 @@ class AnalysisSettingRepositoryImplTest {
         testCategoryList = List.of(
                 categoryRepository.save(Category.builder()
                         .categoryName("한식")
-                        .categoryOrder(1L)
+                        .categoryOrder(1)
                         .build()),
                 categoryRepository.save(Category.builder()
                         .categoryName("일식")
-                        .categoryOrder(2L)
+                        .categoryOrder(2)
                         .build())
         );
 

@@ -17,14 +17,14 @@ public class Category {
     @Comment("카테고리 식별자")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id", columnDefinition = "INTEGER", nullable = false, updatable = false)
+    @Column(name = "category_id")
     private Long categoryId;
 
     @Comment("카테고리 명")
-    @Column(name = "category_name", columnDefinition = "VARCHAR(50)", length = 50)
+    @Column(name = "category_name")
     private String categoryName;
 
     @Column(name = "category_order")
     @Comment("카테고리순서")
-    private Long categoryOrder;
+    private Integer categoryOrder;
 }
