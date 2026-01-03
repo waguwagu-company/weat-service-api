@@ -1,7 +1,6 @@
 package com.waguwagu.weat.domain.category.controller;
 
 import com.waguwagu.weat.domain.category.model.dto.GetAllCategoryListDTO;
-import com.waguwagu.weat.domain.category.model.dto.GetAllCategoryListLegacyDTO;
 import com.waguwagu.weat.domain.category.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,14 +26,9 @@ public class CategoryController {
             description = "모든 카테고리 리스트 반환",
             content = @Content(
                     mediaType = "application/json",
-                    schema = @Schema(implementation = GetAllCategoryListLegacyDTO.Response.class)
+                    schema = @Schema(implementation = GetAllCategoryListDTO.Response.class)
             )
     )
-    @GetMapping("legacy")
-    public GetAllCategoryListLegacyDTO.Response getAllCategoryListLegacy() {
-        return categoryService.getAllCategoryListLegacy();
-    }
-
     @GetMapping
     public GetAllCategoryListDTO.Response getAllCategoryList() {
         return categoryService.getAllCategoryList();
