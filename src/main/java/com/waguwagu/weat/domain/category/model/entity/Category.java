@@ -27,4 +27,18 @@ public class Category {
     @Column(name = "category_order")
     @Comment("카테고리순서")
     private Integer categoryOrder;
+
+    @Column(name = "category_depth")
+    @Comment("카테고리깊이")
+    private Integer categoryDepth;
+
+    @Builder.Default
+    @Column(name = "category_version")
+    @Comment("카테고리버전")
+    private String categoryVersion = "v2";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_parent_id")
+    @Comment("카테고리부모")
+    private Category categoryParent;
 }
