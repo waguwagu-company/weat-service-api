@@ -4,7 +4,6 @@ import com.waguwagu.weat.domain.analysis.adaptor.AIServiceAdaptor;
 import com.waguwagu.weat.domain.analysis.event.AnalysisStartEvent;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisNotFoundForGroupIdException;
 import com.waguwagu.weat.domain.analysis.exception.AnalysisResultDetailNotFoundException;
-import com.waguwagu.weat.domain.analysis.exception.MemberAlreadySubmitSettingForMemberIdException;
 import com.waguwagu.weat.domain.analysis.exception.MemberNotFoundException;
 import com.waguwagu.weat.domain.analysis.model.dto.*;
 import com.waguwagu.weat.domain.analysis.model.entity.*;
@@ -13,7 +12,6 @@ import com.waguwagu.weat.domain.analysis.policy.AnalysisStartPolicy;
 import com.waguwagu.weat.domain.analysis.repository.*;
 import com.waguwagu.weat.domain.category.exception.CategoryTagNotFoundException;
 import com.waguwagu.weat.domain.category.model.entity.CategoryTag;
-import com.waguwagu.weat.domain.category.repository.CategoryRepository;
 import com.waguwagu.weat.domain.category.repository.CategoryTagRepository;
 import com.waguwagu.weat.domain.group.exception.GroupNotFoundException;
 import com.waguwagu.weat.domain.group.model.entity.Group;
@@ -102,6 +100,7 @@ public class AnalysisService {
     }
 
     // 멤버별 분석 설정 제출
+    @Transactional
     public SubmitAnalysisSettingDTO.Response submitAnalysisSetting(SubmitAnalysisSettingDTO.Request requestDto) {
         // 멤버 정보 조회
         Member member = memberRepository.findById(requestDto.getMemberId())
@@ -121,7 +120,7 @@ public class AnalysisService {
                 .build();
 
         // 설정 정보 저장
-        analysisSettingRepository.save(analysisSetting);
+        AnalysisSetting savedAnalysisSetting = analysisSettingRepository.save(analysisSetting);
 
         // 위치 설정
         LocationSetting locationSetting = LocationSetting.builder()
@@ -134,20 +133,34 @@ public class AnalysisService {
         analysisSettingDetailRepository.save(locationSetting);
 
         // 카테고리 설정
-        for (SubmitAnalysisSettingDTO.Request.CategorySetting categorySettingDTO : requestDto.getCategorySettingList()) {
+        List<SubmitAnalysisSettingDTO.Request.CategorySetting> categorySettingList = requestDto.getCategorySettingList();
+        List<Long> categoryTagIds = categorySettingList.stream()
+                .map(SubmitAnalysisSettingDTO.Request.CategorySetting::getCategoryTagId)
+                .distinct()
+                .toList();
 
-            CategoryTag categoryTag = categoryTagRepository.findById(categorySettingDTO.getCategoryTagId())
-                    .orElseThrow(() -> new CategoryTagNotFoundException(categorySettingDTO.getCategoryTagId()));
+        Map<Long, CategoryTag> categoryTagMap = categoryTagRepository.findByCategoryTagIdIn(categoryTagIds).stream()
+                .collect(Collectors.toMap(CategoryTag::getCategoryTagId, Function.identity()));
 
-            CategorySetting categorySetting = CategorySetting.builder()
-                    .analysisSetting(analysisSetting)
-                    .category(categoryTag.getCategory())
-                    .categoryTag(categoryTag)
-                    .isPreferred(categorySettingDTO.getIsPreferred())
-                    .build();
+        List<CategorySetting> categorySettings = categorySettingList.stream()
+                .map(dto -> {
+                    Long categoryTagId = dto.getCategoryTagId();
+                    CategoryTag categoryTag = categoryTagMap.get(categoryTagId);
 
-            analysisSettingDetailRepository.save(categorySetting);
-        }
+                    if (categoryTag == null) {
+                        throw new CategoryTagNotFoundException(categoryTagId);
+                    }
+
+                    return CategorySetting.builder()
+                            .analysisSetting(analysisSetting)
+                            .category(categoryTag.getCategory())
+                            .categoryTag(categoryTag)
+                            .isPreferred(dto.getIsPreferred())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        analysisSettingDetailRepository.saveAll(categorySettings);
 
         // 텍스트 입력 설정
         TextInputSetting textInputSetting = TextInputSetting.builder()
@@ -159,7 +172,7 @@ public class AnalysisService {
 
         return SubmitAnalysisSettingDTO.Response.builder()
                 .memberId(member.getMemberId())
-                .analysisSettingId(analysisSetting.getAnalysisSettingId())
+                .analysisSettingId(savedAnalysisSetting.getAnalysisSettingId())
                 .build();
     }
 
