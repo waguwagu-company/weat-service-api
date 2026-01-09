@@ -29,7 +29,7 @@ public class CategoryTag {
 
     @Column(name = "category_tag_order")
     @Comment("카테고리 태그순서")
-    private Long categoryTagOrder;
+    private Integer categoryTagOrder;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "category_tag_category_fk"))

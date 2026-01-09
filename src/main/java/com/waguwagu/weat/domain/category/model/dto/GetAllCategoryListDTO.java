@@ -1,5 +1,6 @@
 package com.waguwagu.weat.domain.category.model.dto;
 
+import com.waguwagu.weat.domain.category.constant.CategoryTagStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,9 +30,9 @@ public class GetAllCategoryListDTO {
             @Schema(description = "카테고리명")
             private String title;
             @Schema(description = "카테고리 식별자")
-            private int categoryId;
+            private Long categoryId;
             @Schema(description = "카테고리 순서")
-            private int categoryOrder;
+            private Integer categoryOrder;
             @Builder.Default
             @Schema(description = "카테고리 태그 리스트")
             private List<CategoryTag> tags = new ArrayList<>();
@@ -46,13 +47,14 @@ public class GetAllCategoryListDTO {
         @AllArgsConstructor
         public static class CategoryTag {
             @Schema(description = "카테고리 태그 식별자")
-            private int categoryTagId;
+            private Long categoryTagId;
             @Schema(description = "카테고리 태그 순서")
-            private int categoryTagOrder;
+            private Integer categoryTagOrder;
             @Schema(description = "카테고리 태그명")
             private String label;
+            @Builder.Default
             @Schema(description = "카테고리 태그 상태")
-            private String status;
+            private CategoryTagStatus status = CategoryTagStatus.DEFAULT;
         }
     }
 }
