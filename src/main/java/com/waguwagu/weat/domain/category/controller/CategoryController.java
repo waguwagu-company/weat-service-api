@@ -31,6 +31,6 @@ public class CategoryController {
     )
     @GetMapping
     public GetAllCategoryListDTO.Response getAllCategoryList() {
-        return categoryService.getAllCategoryList();
+        return categoryService.getAllCategories();
     }
 }

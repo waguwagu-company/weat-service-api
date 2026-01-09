@@ -31,7 +31,11 @@ public class CategoryService {
     private final CategoryTagRepository categoryTagRepository;
     private final ObjectMapper objectMapper;
 
-    public GetAllCategoryListDTO.Response getAllCategoryList(){
+    /**
+     * @deprecated 해당 메서드는 v1 버전의 카테고리 데이터 제거와 함꼐 제거 예정
+     */
+    @Deprecated
+    public GetAllCategoryListDTO.Response getAllCategoryList() {
         String json = categoryRepository.getAllCategoryList();
         try {
             return objectMapper.readValue(json, GetAllCategoryListDTO.Response.class);
@@ -40,7 +44,6 @@ public class CategoryService {
             log.error("카테고리 트리 조회 실패 => {}", e.getMessage());
 
             return GetAllCategoryListDTO.Response.builder()
-                    .categoryList(new ArrayList<>())
                     .build();
         }
     }
